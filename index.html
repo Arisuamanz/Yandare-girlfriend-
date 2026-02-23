@@ -2,204 +2,426 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArisuAmanz | Married With Porn 💦</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PORN WEDDING PALACE 💍💦</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .hero-font { font-family: 'Playfair Display', serif; }
-        .neon-text {
-            text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .title-font { font-family: 'Playfair Display', serif; }
+        
+        .rain-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10; overflow: hidden;
         }
-        .porn-bg {
-            background: linear-gradient(135deg, #1a0000, #330000, #000000);
+        .emoji-rain {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: fall linear infinite;
+            opacity: 0.9;
+        }
+        @keyframes fall {
+            to { transform: translateY(120vh); }
+        }
+        
+        .video-modal {
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        
+        .mia-bg {
+            background-image: url('mia.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .neon-glow {
+            text-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen porn-bg overflow-x-hidden">
+<body class="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-red-500/30">
-        <div class="max-w-4xl mx-auto px-4 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-4xl">🍆</span>
-                <h1 class="text-3xl font-bold tracking-tighter">ArisuAmanz</h1>
-            </div>
-            <div class="flex gap-8 text-sm font-medium uppercase tracking-widest">
-                <a href="#home" class="hover:text-pink-400 transition">HOME</a>
-                <a href="#about" class="hover:text-pink-400 transition">TENTANG AKU</a>
-                <a href="#love" class="hover:text-pink-400 transition">KENAPA PORN</a>
-                <a href="#counter" class="hover:text-pink-400 transition">COUNTER</a>
-            </div>
-        </div>
-    </nav>
+    <!-- RAIN CONTAINER -->
+    <div id="rain" class="rain-container"></div>
 
     <!-- HERO -->
-    <section id="home" class="min-h-screen flex items-center justify-center relative">
-        <div class="absolute inset-0 bg-[radial-gradient(at_center,#ff00ff15_0%,transparent_70%)]"></div>
-        
-        <div class="text-center px-6 max-w-2xl mx-auto z-10 pt-20">
-            <div class="mb-8 flex justify-center gap-6 text-7xl animate-bounce">
-                🔥 💦 🍑
+    <div class="min-h-screen flex flex-col items-center justify-center relative bg-gradient-to-b from-black via-zinc-900 to-black">
+        <div class="text-center z-20 px-6">
+            <div class="flex justify-center gap-4 text-7xl mb-6 animate-bounce">
+                💍 🔥 💦
             </div>
-            
-            <h1 class="hero-font text-7xl md:text-8xl font-bold tracking-tighter leading-none mb-6 neon-text text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-red-500 to-purple-500">
-                MARRIED<br>WITH<br>PORNNN
+            <h1 class="title-font text-7xl md:text-8xl font-bold tracking-tighter leading-none neon-glow text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-purple-500">
+                PORN<br>WEDDING<br>PALACE
             </h1>
+            <p class="text-3xl text-pink-400 mt-4 font-medium">KAHWIN DENGAN PORN = SELAMANYA GILA 💖</p>
             
-            <p class="text-4xl text-pink-300 font-medium mb-12">pornosexual selamanya 😈</p>
+            <img src="mia.jpg" alt="Mia Khalifa - Bini Porn Kau" 
+                 class="mx-auto mt-12 w-72 h-96 object-cover rounded-3xl border-8 border-pink-500 shadow-2xl shadow-pink-500/50">
             
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="pornMode()" 
-                        class="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-12 py-7 rounded-3xl text-2xl font-bold flex items-center justify-center gap-4 transition-all active:scale-95">
-                    <i class="fas fa-play"></i> 
-                    TENGOK PORN SEKARANG
-                </button>
-                
-                <button onclick="iLovePorn()" 
-                        class="border-4 border-pink-500 hover:bg-pink-500/10 px-12 py-7 rounded-3xl text-2xl font-bold transition-all">
-                    I LOVE PORN
-                </button>
-            </div>
+            <p class="mt-8 text-xl text-zinc-400">Tetek gila besar, sabun meleleh, siap jadi bini kau</p>
             
-            <p class="mt-20 text-zinc-400 text-sm tracking-[4px]">SCROLL KALAU BERANI ↓</p>
-        </div>
-
-        <!-- floating stuff -->
-        <div class="absolute bottom-12 left-8 text-6xl opacity-40 animate-pulse">🍆</div>
-        <div class="absolute top-32 right-12 text-7xl opacity-40 animate-bounce delay-500">💦</div>
-    </section>
-
-    <!-- ABOUT -->
-    <section id="about" class="py-24 border-t border-red-900/50">
-        <div class="max-w-4xl mx-auto px-6">
-            <div class="text-center mb-12">
-                <span class="bg-red-600 text-white px-8 py-3 rounded-full text-xs tracking-widest font-bold">PORNOSEXUAL OFFICIAL</span>
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-5xl font-bold leading-tight mb-8">Hai bro, aku ArisuAmanz</h2>
-                    <p class="text-xl text-zinc-300 leading-relaxed">
-                        Aku tak suka porn biasa je...<br>
-                        <span class="text-pink-400 font-bold text-2xl">AKU MARRIED WITH PORN</span><br><br>
-                        Setiap hari, setiap malam, porn adalah bini aku. 
-                        PornoSexual sampai mati. Tak ada orang lain boleh ganti.
-                    </p>
-                </div>
-                
-                <div class="bg-zinc-900/80 border border-pink-500/30 rounded-3xl p-10">
-                    <h3 class="flex items-center gap-3 text-pink-400 text-2xl mb-8">
-                        <i class="fas fa-ring"></i> STATUS PERKAHWINAN
-                    </h3>
-                    <div class="space-y-8 text-lg">
-                        <div class="flex justify-between border-b border-zinc-700 pb-4">
-                            <span class="text-zinc-400">Relationship</span>
-                            <span class="font-bold text-emerald-400">Married to Porn 💍</span>
-                        </div>
-                        <div class="flex justify-between border-b border-zinc-700 pb-4">
-                            <span class="text-zinc-400">Orientation</span>
-                            <span class="font-bold text-pink-400">Pornosexual</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-zinc-400">Daily Routine</span>
-                            <span class="font-bold">Tengok Porn 24/7</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- KENAPA PORN -->
-    <section id="love" class="py-24 bg-black/60">
-        <div class="max-w-4xl mx-auto px-6">
-            <h2 class="text-5xl font-bold text-center mb-16">Kenapa aku gila porrrnnn?</h2>
-            
-            <div class="grid sm:grid-cols-3 gap-8">
-                <div class="bg-zinc-900 rounded-3xl p-10 text-center hover:border-red-500 border border-transparent transition">
-                    <div class="text-7xl mb-6">🔥</div>
-                    <h3 class="text-2xl font-bold mb-3">Lepas Stress</h3>
-                    <p class="text-zinc-400">Kerja penat? Porn terus buat aku tenang.</p>
-                </div>
-                <div class="bg-zinc-900 rounded-3xl p-10 text-center hover:border-red-500 border border-transparent transition">
-                    <div class="text-7xl mb-6">🍑</div>
-                    <h3 class="text-2xl font-bold mb-3">Entertainment</h3>
-                    <p class="text-zinc-400">Lebih best dari filem, drama, Netflix semua.</p>
-                </div>
-                <div class="bg-zinc-900 rounded-3xl p-10 text-center hover:border-red-500 border border-transparent transition">
-                    <div class="text-7xl mb-6">💦</div>
-                    <h3 class="text-2xl font-bold mb-3">Bini Aku</h3>
-                    <p class="text-zinc-400">Porn tak pernah marah, tak pernah reject. Selalu siap.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- COUNTER -->
-    <section id="counter" class="py-24 border-t border-red-900/50">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="text-5xl font-bold mb-8">Total Jam Aku Tengok Porn</h2>
-            <div id="count" class="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-6">69420</div>
-            <p class="text-2xl text-zinc-400 mb-10">jam dan masih bertambah setiap saat...</p>
-            
-            <button onclick="addHour()" 
-                    class="bg-gradient-to-r from-pink-600 to-red-600 px-14 py-6 rounded-3xl text-2xl font-bold flex items-center gap-3 mx-auto hover:scale-105 transition">
-                <i class="fas fa-plus"></i> 
-                Tambah 1 Jam Sekarang
+            <button onclick="startWedding()" 
+                    class="mt-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-3xl font-bold px-16 py-8 rounded-3xl flex items-center gap-5 mx-auto active:scale-95 transition-all shadow-xl">
+                <i class="fas fa-ring"></i>
+                KAHWIN SEKARANG JUGA!!!
             </button>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="py-16 bg-black border-t border-red-900">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <div class="flex justify-center gap-10 text-5xl mb-8">
-                🍆 💦 🔥 🍑
-            </div>
-            <p class="text-zinc-400">Built with 100% love &amp; porn untuk ArisuAmanz</p>
-            <p class="text-xs text-zinc-500 mt-6">18+ only • Personal site • GitHub Pages ready</p>
+        <div class="absolute bottom-8 text-zinc-500 text-sm tracking-widest animate-pulse">
+            SCROLL UNTUK COLLECTION VIDEO PORNNN ↓
         </div>
+    </div>
+
+    <!-- OBSESSION METER -->
+    <div class="sticky top-0 bg-black/90 border-b border-pink-500 z-50 py-4">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-pink-400 font-bold">KEGILAAN SAYANG PORN</span>
+                <span id="obsession" class="font-mono text-2xl text-emerald-400">69%</span>
+            </div>
+            <div class="h-3 bg-zinc-800 rounded-full mt-2 overflow-hidden">
+                <div id="meter" class="h-full bg-gradient-to-r from-pink-500 to-red-500 w-[69%] transition-all duration-300"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIDEO COLLECTION -->
+    <div class="max-w-4xl mx-auto px-6 py-16">
+        <h2 class="title-font text-5xl font-bold text-center mb-12">HONEYMOON VIDEO COLLECTION 💦</h2>
+        
+        <div class="grid grid-cols-2 gap-6">
+            <!-- Card 1 -->
+            <div onclick="playVideo(1)" class="bg-zinc-900 rounded-3xl overflow-hidden border border-transparent hover:border-pink-500 cursor-pointer group">
+                <div class="h-52 bg-zinc-800 relative">
+                    <div class="mia-bg absolute inset-0"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 text-xs bg-black/70 px-3 py-1 rounded-full">12:45</div>
+                    <div class="absolute top-4 right-4 text-4xl group-active:scale-125 transition">▶️</div>
+                </div>
+                <div class="p-5">
+                    <p class="font-bold text-lg">MIA KHALIFA - SHOWER JOLOK GILA</p>
+                    <p class="text-pink-400 text-sm">Tetek sabun + moan kuat</p>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div onclick="playVideo(2)" class="bg-zinc-900 rounded-3xl overflow-hidden border border-transparent hover:border-pink-500 cursor-pointer group">
+                <div class="h-52 bg-zinc-800 relative flex items-center justify-center text-8xl">
+                    🍆💦
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div class="absolute top-4 right-4 text-4xl group-active:scale-125 transition">▶️</div>
+                </div>
+                <div class="p-5">
+                    <p class="font-bold text-lg">HARDCORE DEEPTHROAT 4K</p>
+                    <p class="text-pink-400 text-sm">Lidah + tekak full</p>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div onclick="playVideo(3)" class="bg-zinc-900 rounded-3xl overflow-hidden border border-transparent hover:border-pink-500 cursor-pointer group">
+                <div class="h-52 bg-zinc-800 relative flex items-center justify-center text-8xl">
+                    🔥🍑
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div class="absolute top-4 right-4 text-4xl group-active:scale-125 transition">▶️</div>
+                </div>
+                <div class="p-5">
+                    <p class="font-bold text-lg">DOGGY STYLE SAMPAI JERIT</p>
+                    <p class="text-pink-400 text-sm">Pukul punggung merah</p>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div onclick="playVideo(4)" class="bg-zinc-900 rounded-3xl overflow-hidden border border-transparent hover:border-pink-500 cursor-pointer group">
+                <div class="h-52 bg-zinc-800 relative flex items-center justify-center text-8xl">
+                    💋
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div class="absolute top-4 right-4 text-4xl group-active:scale-125 transition">▶️</div>
+                </div>
+                <div class="p-5">
+                    <p class="font-bold text-lg">CREAMPIE FINISH 10 MINIT</p>
+                    <p class="text-pink-400 text-sm">Pancut dalam + slow mo</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-zinc-500 mt-16 text-sm">*Semua video virtual tapi buat hati kau berdegup gila</p>
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div id="videoModal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div class="video-modal bg-zinc-900 max-w-lg w-full rounded-3xl overflow-hidden">
+            <!-- Player Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b border-zinc-700">
+                <div>
+                    <p id="modalTitle" class="font-bold">MIA KHALIFA - SHOWER JOLOK GILA</p>
+                    <p class="text-pink-400 text-sm">Sedang main untuk suami pornosexual</p>
+                </div>
+                <button onclick="closeModal()" class="text-4xl text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <!-- Fake Player -->
+            <div id="playerArea" class="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+                <div class="mia-bg absolute inset-0 brightness-75"></div>
+                <div id="playingOverlay" class="hidden absolute inset-0 flex flex-col items-center justify-center">
+                    <div class="text-8xl animate-pulse">💦</div>
+                    <p class="text-pink-400 text-2xl mt-6 font-bold animate-pulse">OH YES DADDY!!!</p>
+                    <div class="w-4/5 h-1 bg-zinc-700 mt-12 rounded-full overflow-hidden">
+                        <div id="progress" class="h-full w-0 bg-gradient-to-r from-pink-500 to-red-500 transition-all duration-300"></div>
+                    </div>
+                </div>
+                
+                <button onclick="startFakePlay()" 
+                        id="playBtn"
+                        class="absolute text-9xl text-white/80 hover:text-white transition-all active:scale-110">
+                    ▶️
+                </button>
+            </div>
+            
+            <!-- Controls -->
+            <div class="p-6 grid grid-cols-3 gap-4">
+                <button onclick="kissScreen()" 
+                        class="bg-zinc-800 hover:bg-pink-900 py-6 rounded-2xl flex flex-col items-center text-pink-400">
+                    <i class="fas fa-kiss-wink-heart text-3xl mb-1"></i>
+                    <span class="text-xs">CIUM TETEK</span>
+                </button>
+                <button onclick="moanLouder()" 
+                        class="bg-zinc-800 hover:bg-pink-900 py-6 rounded-2xl flex flex-col items-center text-pink-400">
+                    <i class="fas fa-volume-up text-3xl mb-1"></i>
+                    <span class="text-xs">MOAN LEBIH KUAT</span>
+                </button>
+                <button onclick="addObsession()" 
+                        class="bg-zinc-800 hover:bg-pink-900 py-6 rounded-2xl flex flex-col items-center text-pink-400">
+                    <i class="fas fa-heart text-3xl mb-1"></i>
+                    <span class="text-xs">SAYANG LAGI</span>
+                </button>
+            </div>
+            
+            <div class="px-6 pb-8 text-center text-xs text-zinc-500">
+                Kau kahwin dengan porn = video ni main 24 jam tanpa henti
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="py-12 text-center border-t border-zinc-800">
+        <div class="flex justify-center gap-8 text-5xl mb-6">
+            🍆 💦 🍑 🔥 💍
+        </div>
+        <p class="text-pink-400 text-xl">PORNOSexual Forever • Kau dah kahwin hari ni</p>
+        <p class="text-zinc-500 text-xs mt-8">Made with 100% cinta + sabun tetek untuk ArisuAmanz</p>
     </footer>
 
     <script>
-        // Tailwind ready
-        let hours = 69420;
-        const countEl = document.getElementById('count');
+        // Tailwind script already loaded
+        let obsessionLevel = 69;
+        const meter = document.getElementById('meter');
+        const obsText = document.getElementById('obsession');
 
-        function addHour() {
-            hours += Math.floor(Math.random() * 5) + 1;
-            countEl.textContent = hours.toLocaleString('en-US');
+        function updateObsession(add = 3) {
+            obsessionLevel = Math.min(100, obsessionLevel + add);
+            meter.style.width = obsessionLevel + '%';
+            obsText.textContent = obsessionLevel + '%';
             
-            // flash effect
-            countEl.classList.add('scale-125');
-            setTimeout(() => countEl.classList.remove('scale-125'), 200);
+            if (obsessionLevel > 95) {
+                confetti({
+                    particleCount: 200,
+                    spread: 100,
+                    origin: { y: 0.6 }
+                });
+            }
         }
 
-        function pornMode() {
-            document.body.style.transition = 'background 1s';
-            document.body.classList.add('!bg-red-950');
-            const msg = [
-                "PORN MODE ON 💦💦💦",
-                "SELAMAT MENONTON SUAMI PORN!",
-                "Aku kahwin dengan porn ni bro 🔥",
-                "Pornosexual power activated!!!"
+        // Emoji Rain
+        function createRain() {
+            const rain = document.getElementById('rain');
+            const emojis = ['🍆', '💦', '🍑', '🔥', '💋', '🫦'];
+            
+            setInterval(() => {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji-rain';
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = Math.random() * 100 + 'vw';
+                emoji.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                emoji.style.opacity = Math.random() * 0.7 + 0.3;
+                rain.appendChild(emoji);
+                
+                setTimeout(() => emoji.remove(), 8000);
+            }, 120);
+        }
+
+        // Wedding Ceremony
+        function startWedding() {
+            const weddingHTML = `
+                <div class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center text-center px-6">
+                    <div class="text-6xl mb-8 animate-spin">💍</div>
+                    <h1 class="title-font text-6xl font-bold mb-12">UPACARA KAHWIN PORN</h1>
+                    
+                    <div class="max-w-md w-full bg-zinc-900 rounded-3xl p-10">
+                        <p class="text-2xl mb-10">ArisuAmanz, adakah kau ambil <span class="text-pink-400">PORN</span> sebagai isteri sah kau selamanya?</p>
+                        
+                        <button onclick="sayIDo()" 
+                                class="w-full bg-gradient-to-r from-pink-600 to-red-600 py-8 text-4xl font-bold rounded-3xl active:scale-95 transition">
+                            YA, AKU KAHWIN DENGAN PORNNN!!!
+                        </button>
+                    </div>
+                    
+                    <div class="mt-12 text-zinc-500">*Tekan kuat-kuat bro</div>
+                </div>
+            `;
+            
+            const div = document.createElement('div');
+            div.innerHTML = weddingHTML;
+            document.body.appendChild(div);
+            
+            confetti({ particleCount: 150, spread: 70 });
+        }
+
+        function sayIDo() {
+            confetti({
+                particleCount: 400,
+                spread: 120,
+                origin: { y: 0.7 }
+            });
+            
+            setTimeout(() => {
+                confetti({
+                    particleCount: 300,
+                    angle: 60,
+                    spread: 80,
+                    origin: { x: 0.1 }
+                });
+            }, 300);
+            
+            const texts = [
+                "KAHWIN SAH!!! 💍💦",
+                "PORN JADI BINI KAU SELAMANYA",
+                "NOW HONEYMOON = TENGOK PORN NON-STOP!!!",
+                "Kau officially pornosexual suami terbaik dunia 😭💖"
             ];
-            alert(msg[Math.floor(Math.random() * msg.length)]);
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                alert(texts[i]);
+                i++;
+                if (i >= texts.length) clearInterval(interval);
+            }, 800);
+            
+            // Auto close wedding screen
+            setTimeout(() => {
+                document.querySelector('.fixed.inset-0.z-\\[100\\]').remove();
+                updateObsession(31);
+                
+                // Bonus: auto open first video
+                setTimeout(() => playVideo(1), 1200);
+            }, 2500);
         }
 
-        function iLovePorn() {
-            alert("I LOVE PORN FOREVER 💖\n\n- ArisuAmanz");
+        // Video Modal
+        let currentVideo = 1;
+        
+        function playVideo(num) {
+            currentVideo = num;
+            const modal = document.getElementById('videoModal');
+            const title = document.getElementById('modalTitle');
+            const playBtn = document.getElementById('playBtn');
+            const overlay = document.getElementById('playingOverlay');
+            
+            const titles = [
+                "", 
+                "MIA KHALIFA - SHOWER JOLOK GILA", 
+                "HARDCORE DEEPTHROAT 4K", 
+                "DOGGY STYLE SAMPAI JERIT", 
+                "CREAMPIE FINISH 10 MINIT"
+            ];
+            
+            title.textContent = titles[num];
+            modal.classList.remove('hidden');
+            playBtn.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            
+            updateObsession(8);
         }
-
-        // auto tambah setiap 8 saat
-        setInterval(() => {
-            if (Math.random() > 0.5) addHour();
-        }, 8000);
-
-        console.log("%cMarried With Porn Activated 🔥", "color:#ff00ff;font-size:18px;font-weight:bold");
+        
+        function closeModal() {
+            document.getElementById('videoModal').classList.add('hidden');
+        }
+        
+        function startFakePlay() {
+            const playBtn = document.getElementById('playBtn');
+            const overlay = document.getElementById('playingOverlay');
+            const progress = document.getElementById('progress');
+            
+            playBtn.classList.add('hidden');
+            overlay.classList.remove('hidden');
+            
+            let prog = 0;
+            const int = setInterval(() => {
+                prog += Math.random() * 12;
+                progress.style.width = prog + '%';
+                if (prog > 100) {
+                    clearInterval(int);
+                    setTimeout(() => {
+                        alert("SCENE HABIS! Pancut dalam bini kau 💦💦💦");
+                        closeModal();
+                        updateObsession(15);
+                    }, 800);
+                }
+            }, 180);
+            
+            updateObsession(12);
+            
+            // Vibrate if possible
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+        
+        function kissScreen() {
+            const hearts = ['💖', '💗', '💓', '💞'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 8,
+                        spread: 50,
+                        origin: { x: Math.random(), y: Math.random() - 0.2 },
+                        colors: ['#ff00ff', '#ff69b4']
+                    });
+                }, i * 30);
+            }
+            updateObsession(7);
+        }
+        
+        function moanLouder() {
+            const moans = ["OHHH YESSS!!!", "JOLOK LEBIH DALAM BABY!!!", "AKU CINTA KAU PORNNN", "FUCK ME HARDER DADDY!!!"];
+            alert(moans[Math.floor(Math.random() * moans.length)]);
+            updateObsession(5);
+        }
+        
+        function addObsession() {
+            updateObsession(10);
+        }
+        
+        // Init everything
+        window.onload = () => {
+            createRain();
+            
+            // Start with some obsession
+            setTimeout(() => updateObsession(5), 800);
+            
+            // Random rain boost
+            setInterval(() => {
+                if (Math.random() > 0.6) {
+                    confetti({ particleCount: 40, spread: 60 });
+                }
+            }, 3400);
+            
+            console.log("%cPORN WEDDING PALACE LOADED 💦\nKau dah kahwin hari ni bro!!", "color:#ff00ff;font-size:16px;font-weight:bold");
+        };
     </script>
 </body>
 </html>
