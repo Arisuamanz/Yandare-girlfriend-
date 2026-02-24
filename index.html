@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maimy: The Kidnapping (Full)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* BASE STYLES */
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Nunito', sans-serif; user-select: none; color: white; }
+        
+        /* SETUP SCREEN */
+        #setup-screen {
+            position: absolute; inset: 0; z-index: 999; background: #0a0a0a; 
+            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 20px 20px;
+        }
+        .upload-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05); padding: 12px 18px; margin-bottom: 10px; 
+            border-radius: 8px; border: 1px solid #333; transition: 0.3s; cursor: pointer;
+        }
+        .upload-row:hover { border-color: #ff4757; background: rgba(255, 71, 87, 0.1); }
+        .upload-row.done { border-color: #2ed573; background: rgba(46, 213, 115, 0.1); }
+        .btn-start { 
+            background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; padding: 15px; 
+            border-radius: 8px; font-weight: 800; letter-spacing: 1px; margin-top: 20px; 
+            width: 100%; opacity: 0.5; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        .btn-start:not(:disabled) { opacity: 1; cursor: pointer; transform: translateY(-2px); }
+
+        /* GAME STAGE */
+        #game-stage { 
+            position: relative; width: 100vw; height: 100vh; max-width: 600px; margin: 0 auto; 
+            background: #000; box-shadow: 0 0 100px rgba(0,0,0,0.9); overflow: hidden; 
+        }
+
+        /* LAYERS Z-INDEX STRUCTURE */
+        .layer-bg { z-index: 1; }
+        .layer-fx { z-index: 5; pointer-events: none; }
+        .layer-char { z-index: 10; pointer-events: none; }
+        .layer-overlay { z-index: 20; pointer-events: none; } 
+        .layer-ui { z-index: 50; pointer-events: none; } 
+
+        /* LAYERS CSS */
+        .absolute-fill { position: absolute; inset: 0; transition: all 0.5s ease; }
+        
+        #bg-layer { 
+            background-size: cover; background-position: center; filter: brightness(0.6); 
+            transform: scale(1); transition: transform 20s linear, filter 0.5s ease;
+        }
+        .ken-burns { transform: scale(1.2) !important; }
+
+        /* ATMOSPHERE OVERLAYS */
+        .vignette { position: absolute; inset: 0; background: radial-gradient(circle, transparent 50%, black 120%); z-index: 3; pointer-events: none; }
+        .scanlines {
+            position: absolute; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px; z-index: 4; pointer-events: none; opacity: 0.6;
+        }
+        .dust-particles {
+            position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/Anis-M/assets/main/dust.png'); 
+            opacity: 0.3; animation: float 10s linear infinite; z-index: 2; pointer-events: none;
+        }
+
+        /* CHARACTER */
+        #char-layer { 
+            display: flex; align-items: flex-end; justify-content: center; 
+            bottom: -20px; transition: transform 0.5s; 
+            height: 90vh; 
+        }
+        .sprite { 
+            height: 105%; 
+            max-width: none; object-fit: contain;
+            transform-origin: bottom center;
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
+            transition: filter 0.3s;
+        }
+
+        /* UI ELEMENTS */
+        #ui-layer { padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+
+        /* HUD */
+        .heart-meter { 
+            pointer-events: auto; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);
+            padding: 8px 20px; border-radius: 50px; border: 1px solid rgba(255, 71, 87, 0.3);
+            display: flex; align-items: center; gap: 15px; width: fit-content;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: transform 0.2s;
+        }
+        .heart-icon { color: #ff4757; font-size: 1.2rem; filter: drop-shadow(0 0 5px #ff4757); }
+        .bar-bg { width: 140px; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #444; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #ff7e5f); width: 50%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #ff4757; }
+
+        /* DIALOG BOX */
+        .dialog-box { 
+            pointer-events: auto; 
+            background: rgba(18, 18, 20, 0.85); backdrop-filter: blur(12px);
+            border-top: 2px solid #ff4757; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 20px; min-height: 130px; margin-bottom: 5px; 
+            cursor: pointer; position: relative; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        .dialog-box:active { transform: scale(0.99); }
+        .name-tag { 
+            position: absolute; top: -14px; left: 24px; 
+            background: linear-gradient(45deg, #ff4757, #d63031); color: white; 
+            padding: 4px 18px; font-weight: 800; font-size: 0.9rem; 
+            border-radius: 4px; transform: skew(-10deg);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+        }
+        .dialog-text { font-size: 1rem; line-height: 1.5; color: #f1f1f1; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        .narrator-text { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: #bbb; font-style: italic; text-align: center; margin-top: 20px; }
+
+        /* CHOICES CONTAINER (DIKEMASKINI: DINAIIKKAN KE ATAS) */
+        .choices-wrapper { 
+            pointer-events: auto; 
+            display: flex; flex-direction: column; gap: 8px; 
+            position: absolute; 
+            bottom: 220px; /* Dinaikkan dari 160px ke 220px supaya tak bertindih */
+            left: 50%; transform: translateX(-50%); 
+            width: 80%; max-width: 380px; 
+            z-index: 100;
+        }
+        .choice-btn { 
+            background: rgba(20, 20, 25, 0.75); 
+            backdrop-filter: blur(8px); 
+            color: #fff; padding: 12px 16px; 
+            border-radius: 8px; 
+            font-weight: 700; text-align: left; border-left: 4px solid #555; 
+            font-size: 0.9rem; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .choice-btn:hover { 
+            background: rgba(255, 255, 255, 0.9); color: #000; border-left-color: #ff4757; 
+            transform: translateX(8px); 
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+        }
+        .choice-btn:active { transform: scale(0.98); }
+
+        /* FEEDBACK POPUPS */
+        .floating-text {
+            position: absolute; font-weight: 900; font-size: 2rem; 
+            pointer-events: none; z-index: 50; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            animation: floatUp 1s forwards;
+        }
+        .ft-good { color: #2ed573; }
+        .ft-bad { color: #ff4757; }
+
+        /* OVERLAYS & ANIMATIONS */
+        #blackout { background: black; opacity: 0; transition: opacity 2s; pointer-events: none; }
+        #blood-screen { background: red; mix-blend-mode: multiply; opacity: 0; transition: opacity 3s; pointer-events: none; }
+        #end-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Special Elite', cursive; font-size: 3rem; color: red; opacity: 0; text-shadow: 0 0 10px black; pointer-events: none; }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        .glitch-anim { animation: glitch 0.2s 2; }
+        .pulse-red { animation: pulseRed 2s infinite; }
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .yandere-mode { filter: contrast(1.4) sepia(0.4) hue-rotate(-50deg) brightness(0.7) !important; }
+
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(20px) scale(0.5); } 20% { opacity: 1; transform: translateY(0) scale(1.2); } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
+        @keyframes glitch { 0% { transform: translate(0) } 20% { transform: translate(-5px, 5px) filter: hue-rotate(90deg); } 40% { transform: translate(-5px, -5px) } 60% { transform: translate(5px, 5px) } 80% { transform: translate(5px, -5px) } 100% { transform: translate(0) } }
+        @keyframes pulseRed { 0% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 50px rgba(255,0,0,0.5); } 100% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes float { from { background-position: 0 0; } to { background-position: 100px 100px; } }
+    </style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+    <div class="max-w-md w-full m-auto text-center">
+        <h1 class="text-4xl text-red-500 font-black mb-2 tracking-tighter drop-shadow-lg">MAIMY: KIDNAPPED</h1>
+        <p class="text-xs text-gray-500 mb-8 uppercase tracking-widest">Full Story Version</p>
+
+        <!-- Upload Inputs -->
+        <div class="upload-row" id="row-street" onclick="document.getElementById('in-street').click()">
+            <div class="text-left">
+                <p class="font-bold text-sm text-gray-200">1. Jalan Raya (Intro)</p>
+                <p class="text-[10px] text-gray-500">Fail: 413927.jpg</p>
+            </div>
+            <span class="text-xl opacity-50">🛣️</span>
+            <input type="file" id="in-street" hidden accept="image/*" onchange="load(this, 'street', 'row-street')">
+        </div>
+
+        <div class="upload-row" id="row-room" onclick="document.getElementById('in-room').click()">
+            <div class="text-left">
+                <p class="font-bold text-sm text-gray-200">2. Bilik (Background)</p>
+                <p class="text-[10px] text-gray-500">Fail: 413636.png</p>
+            </div>
+            <span class="text-xl opacity-50">🏠</span>
+            <input type="file" id="in-room" hidden accept="image/*" onchange="load(this, 'room', 'row-room')">
+        </div>
+
+        <div class="upload-row" id="row-norm" onclick="document.getElementById('in-norm').click()">
+            <div class="text-left">
+                <p class="font-bold text-sm text-gray-200">3. Maimy Normal</p>
+                <p class="text-[10px] text-gray-500">Fail: 413926.png</p>
+            </div>
+            <span class="text-xl opacity-50">🙂</span>
+            <input type="file" id="in-norm" hidden accept="image/*" onchange="load(this, 'normal', 'row-norm')">
+        </div>
+
+        <div class="upload-row" id="row-kill" onclick="document.getElementById('in-kill').click()">
+            <div class="text-left">
+                <p class="font-bold text-sm text-red-400">4. Maimy Killer</p>
+                <p class="text-[10px] text-gray-500">Fail: 352953.png</p>
+            </div>
+            <span class="text-xl opacity-50">🔪</span>
+            <input type="file" id="in-kill" hidden accept="image/*" onchange="load(this, 'killer', 'row-kill')">
+        </div>
+
+        <button id="btn-start" class="btn-start" onclick="initGame()" disabled>MULAKAN EPISOD</button>
+    </div>
+</div>
+
+<!-- GAME STAGE -->
+<div id="game-stage">
+    <!-- Layer 1: Background -->
+    <div id="bg-layer" class="absolute-fill layer-bg"></div>
+    
+    <!-- Layer 2: Atmosphere -->
+    <div class="absolute-fill layer-fx" style="background: radial-gradient(circle, transparent 50%, black 120%); z-index: 5;"></div>
+    <div class="dust-particles layer-fx"></div>
+    <div class="scanlines layer-fx"></div>
+    <div class="vignette layer-fx"></div>
+    
+    <!-- Layer 3: Character -->
+    <div id="char-layer" class="absolute-fill layer-char">
+        <img id="char-sprite" class="sprite" src="" alt="Maimy">
+    </div>
+
+    <!-- Layer 4: Overlays (Blackout/Blood) -->
+    <div id="blackout" class="absolute-fill layer-overlay"></div>
+    <div id="blood-screen" class="absolute-fill layer-overlay"></div>
+    <div id="end-msg" class="layer-overlay">TAMAT</div>
+
+    <!-- Layer 5: UI (Dialog & Choices) - TOP LAYER -->
+    <div id="ui-layer" class="absolute-fill layer-ui">
+        <!-- Affirmation Bar -->
+        <div class="heart-meter pop-in" id="hud">
+            <span class="heart-icon animate-pulse">❤</span>
+            <div class="bar-bg"><div id="bar" class="bar-fill"></div></div>
+            <span id="pct" class="font-mono text-xs font-bold text-gray-300">50%</span>
+        </div>
+
+        <!-- Choices Container -->
+        <div id="choices" class="choices-wrapper hidden"></div>
+
+        <!-- Dialog Box -->
+        <div id="dialog" class="dialog-box pop-in" onclick="next()">
+            <div id="name" class="name-tag">Maimy</div>
+            <p id="text" class="dialog-text">...</p>
+            <div class="text-right text-xs text-gray-500 mt-2 animate-bounce">▼ (Space)</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ASSETS DB
+    const assets = { street: null, room: null, normal: null, killer: null };
+    let state = { node: 'intro_walk', aff: 0.5 };
+
+    // UPLOAD LOGIC
+    function load(input, key, rowId) {
+        if(input.files[0]) {
+            const r = new FileReader();
+            r.onload = e => {
+                assets[key] = e.target.result;
+                document.getElementById(rowId).classList.add('done');
+                checkAll();
+            };
+            r.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function checkAll() {
+        if(assets.street && assets.room && assets.normal && assets.killer) {
+            document.getElementById('btn-start').disabled = false;
+        }
+    }
+
+    // STORY DATA
+    const story = {
+        // --- DAY 1 ---
+        'intro_walk': {
+            bg: 'street', sprite: null, narrator: true,
+            text: "Jam menunjukkan pukul 11 malam. Anda berjalan pulang dari kedai serbaneka melalui lorong yang sunyi.",
+            next: 'kidnap_moment'
+        },
+        'kidnap_moment': {
+            bg: 'street', sprite: null, narrator: true,
+            text: "Bunyi cengkerik menemani langkah anda. Tiba-tiba, anda terdengar bunyi tapak kaki laju di belakang anda.",
+            next: 'blackout_hit'
+        },
+        'blackout_hit': {
+            special: 'blackout', narrator: true,
+            text: "GEDEBUK!!\n\nSatu pukulan kuat hinggap di kepala anda. Pandangan anda menjadi gelap serta-merta.",
+            next: 'wakeup_room'
+        },
+        'wakeup_room': {
+            bg: 'room', sprite: null, narrator: true, special: 'fadein',
+            text: "Kepala anda berdenyut sakit. Anda membuka mata perlahan-lahan.\n\nIni... bukan bilik anda. Tangan anda terikat pada kepala katil.",
+            next: 'maimy_enter'
+        },
+        'maimy_enter': {
+            bg: 'room', sprite: 'normal', 
+            text: "Selamat pagi, sayang! Nyenyak awak tidur? Saya risau tau awak tak bangun-bangun dari semalam.",
+            next: 'first_choice'
+        },
+        'first_choice': {
+            bg: 'room', sprite: 'normal',
+            text: "Jangan risau, saya ikat awak longgar je. Supaya awak tak 'sesat' lagi macam semalam.",
+            choices: [
+                { text: "Lepaskan aku! Siapa kau?!", delta: -0.3, next: 'path_angry' },
+                { text: "Kepala saya sakit... air...", delta: 0.1, next: 'path_calm' }
+            ]
+        },
+        'path_angry': {
+            bg: 'room', sprite: 'normal',
+            text: "Shhh... jangan jerit. Jiran tak suka bising. Saya Maimy. Dan mulai hari ni, saya penjaga awak. Faham?",
+            choices: [
+                { text: "Kau gila! Aku nak balik!", delta: -0.4, next: 'trigger_death' },
+                { text: "Baik... saya faham.", delta: 0.1, next: 'path_calm' }
+            ]
+        },
+        'path_calm': {
+            bg: 'room', sprite: 'normal',
+            text: "Kesiannya... mesti sakit kan kena pukul semalam? Maaf ya, saya terpaksa. Kalau tak, awak takkan ikut saya balik.",
+            next: 'feeding_time'
+        },
+        'feeding_time': {
+            bg: 'room', sprite: 'normal',
+            text: "Nah, saya masak bubur. Buka mulut... Aaaa...",
+            choices: [
+                { text: "(Makan) Terima kasih, Maimy.", delta: 0.2, next: 'day_1_end' },
+                { text: "(Ludah makanan) Aku tak nak makanan kau!", delta: -0.5, next: 'trigger_death' }
+            ]
+        },
+        'day_1_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "Anda memilih untuk patuh. Maimy tersenyum puas dan menyuapkan makanan sehingga habis. Malam pun berlabuh...",
+            next: 'day_2_start'
+        },
+
+        // --- DAY 2: ISOLATION ---
+        'day_2_start': {
+            bg: 'room', sprite: 'normal',
+            text: "Keesokan harinya... Maimy bersiap sedia dengan beg tangan. Dia kelihatan ceria.",
+            next: 'maimy_leaving'
+        },
+        'maimy_leaving': {
+            bg: 'room', sprite: 'normal',
+            text: "Saya kena keluar beli barang dapur sekejap. Saya tak ikat awak hari ni, tapi pintu saya dah kunci. Jangan nakal-nakal ya?",
+            choices: [
+                { text: "Okay, hati-hati.", delta: 0.1, next: 'alone_start' },
+                { text: "Bawa aku sekali!", delta: -0.2, next: 'alone_angry' }
+            ]
+        },
+        'alone_angry': {
+            bg: 'room', sprite: 'normal',
+            text: "Tak boleh! Dunia luar bahaya. Awak duduk sini diam-diam. Nanti saya belikan gula-gula.",
+            next: 'alone_start'
+        },
+        'alone_start': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Maimy keluar dan mengunci pintu. Anda kini keseorangan di dalam bilik.",
+            next: 'exploration_choice'
+        },
+        'exploration_choice': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Apa yang anda mahu lakukan?",
+            choices: [
+                { text: "Geledah Laci Meja", delta: 0, next: 'check_drawer' },
+                { text: "Periksa Tingkap", delta: 0, next: 'check_window' }
+            ]
+        },
+        'check_drawer': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Anda menjumpai sebuah diari lama. Isinya penuh dengan gambar anda yang diambil secara senyap sejak setahun lalu. 'Dia akhirnya milikku...', tulisnya.",
+            next: 'maimy_return_sound'
+        },
+        'check_window': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Tingkap itu dipaku dengan papan tebal dari luar. Mustahil untuk dibuka tanpa alatan berat. Anda terperangkap.",
+            next: 'maimy_return_sound'
+        },
+        'maimy_return_sound': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "KLIK! Bunyi kunci pintu dibuka. Maimy sudah pulang lebih awal dari jangkaan!",
+            next: 'gift_scene'
+        },
+
+        // --- THE GIFT ---
+        'gift_scene': {
+            bg: 'room', sprite: 'normal',
+            text: "Saya dah balik! Rindu saya tak? Saya ada belikan hadiah istimewa untuk awak.",
+            choices: [
+                { text: "Hadiah apa?", delta: 0.1, next: 'gift_reveal' },
+                { text: "Aku tak nak hadiah kau.", delta: -0.2, next: 'gift_reveal_force' }
+            ]
+        },
+        'gift_reveal': {
+            bg: 'room', sprite: 'normal',
+            text: "Nah... (Dia mengeluarkan rantai leher berloceng). Pakai ni? Supaya saya tahu mana awak pergi dalam rumah ni.",
+            next: 'wear_collar_choice'
+        },
+        'gift_reveal_force': {
+            bg: 'room', sprite: 'normal',
+            text: "Jangan sombong. Nah, pakai rantai ni. Kalau tak, saya ikat awak balik kat katil.",
+            next: 'wear_collar_choice'
+        },
+        'wear_collar_choice': {
+            bg: 'room', sprite: 'normal',
+            text: "(Maimy memegang rantai itu sambil tersenyum menakutkan)",
+            choices: [
+                { text: "(Pakai) Cantik...", delta: 0.3, next: 'true_love_dinner' },
+                { text: "(Lempar) Aku bukan anjing kau!", delta: -0.5, next: 'trigger_death' }
+            ]
+        },
+
+        // --- DINNER & ENDINGS ---
+        'true_love_dinner': {
+            bg: 'room', sprite: 'normal',
+            text: "Anak yang baik... Jom makan? Saya masak daging istimewa hari ni.",
+            next: 'meat_joke'
+        },
+        'meat_joke': {
+            bg: 'room', sprite: 'normal',
+            text: "Sedap tak? Daging ni... dari orang yang cuba kacau awak minggu lepas.",
+            choices: [
+                { text: "Apa?! (Muntah)", delta: -0.2, next: 'joke_reveal' },
+                { text: "Sedap... terima kasih.", delta: 0.4, next: 'stockholm_end' }
+            ]
+        },
+        'joke_reveal': {
+            bg: 'room', sprite: 'normal',
+            text: "Hahaha! Gurau je lah. Tu daging lembu. Awak ni comel bila takut. Jom tidur?",
+            next: 'survival_end'
+        },
+        
+        'trigger_death': { special: 'die' },
+        'stockholm_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "[ TRUE YANDERE ENDING ]\nAnda menerima kegilaan Maimy. Anda berdua hidup bahagia dalam dunia kecil ini... selamanya.",
+            next: null
+        },
+        'survival_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "[ SURVIVAL ENDING ]\nAnda terselamat untuk satu lagi hari. Tetapi adakah anda akan bebas? Mungkin tidak.",
+            next: null
+        }
+    };
+
+    // ENGINE
+    function initGame() {
+        document.getElementById('setup-screen').style.display = 'none';
+        render('intro_walk');
+        updateBar();
+    }
+
+    function render(id) {
+        const node = story[id];
+        if(!node) return;
+        state.node = id;
+
+        // ANIMATE BG
+        const bgLayer = document.getElementById('bg-layer');
+        bgLayer.classList.remove('ken-burns');
+        void bgLayer.offsetWidth;
+        bgLayer.classList.add('ken-burns');
+
+        // EFFECTS & OVERLAYS
+        const blackout = document.getElementById('blackout');
+        if(node.special === 'blackout') {
+            blackout.style.opacity = 1;
+        } else if(node.special === 'fadein') {
+            blackout.style.opacity = 0;
+            setTimeout(() => { if(node.special==='fadein') blackout.style.display = 'none'; }, 2000);
+        } else {
+             blackout.style.display = 'none';
+        }
+        
+        if(node.special === 'die') { killSequence(); return; }
+
+        // BACKGROUND
+        if(node.bg === 'street') bgLayer.style.backgroundImage = `url('${assets.street}')`;
+        if(node.bg === 'room') bgLayer.style.backgroundImage = `url('${assets.room}')`;
+
+        // SPRITE
+        const charImg = document.getElementById('char-sprite');
+        if(node.sprite === 'normal') {
+            charImg.src = assets.normal;
+            charImg.style.opacity = 1;
+            charImg.classList.remove('yandere-mode');
+        } else if (node.sprite === 'killer') {
+            charImg.src = assets.killer;
+            charImg.style.opacity = 1;
+            charImg.classList.add('yandere-mode');
+        } else {
+            charImg.style.opacity = 0;
+        }
+
+        // TEXT & UI
+        const nameTag = document.getElementById('name');
+        const txt = document.getElementById('text');
+        const choices = document.getElementById('choices');
+        const dialogBox = document.getElementById('dialog');
+        
+        choices.classList.add('hidden');
+        choices.innerHTML = '';
+        dialogBox.classList.remove('pop-in');
+        void dialogBox.offsetWidth;
+        dialogBox.classList.add('pop-in');
+
+        if(node.narrator) {
+            nameTag.style.display = 'none';
+            txt.className = 'narrator-text';
+            txt.innerText = node.text;
+        } else {
+            nameTag.style.display = 'block';
+            nameTag.innerText = "Maimy";
+            txt.className = 'dialog-text';
+            txt.innerText = node.text;
+        }
+
+        // CHOICES GENERATION
+        if(node.choices) {
+            document.querySelector('.animate-bounce').style.display = 'none';
+            node.choices.forEach((c, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'choice-btn pop-in';
+                btn.style.animationDelay = `${index * 0.1}s`;
+                btn.innerText = c.text;
+                // Event listener with propagation stop
+                btn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault(); 
+                    makeChoice(c); 
+                };
+                choices.appendChild(btn);
+            });
+            choices.classList.remove('hidden');
+        } else {
+            document.querySelector('.animate-bounce').style.display = 'block';
+        }
+    }
+
+    function makeChoice(c) {
+        state.aff += c.delta;
+        updateBar();
+        showFeedback(c.delta); // Show Visual Effect
+
+        if(state.aff <= 0) {
+            killSequence();
+        } else {
+            if(c.next) render(c.next);
+        }
+    }
+
+    // VISUAL FEEDBACK FUNCTION
+    function showFeedback(delta) {
+        const hud = document.getElementById('hud');
+        const el = document.createElement('div');
+        el.className = `floating-text ${delta >= 0 ? 'ft-good' : 'ft-bad'}`;
+        
+        const rect = hud.getBoundingClientRect();
+        el.style.left = `${rect.right + 10}px`;
+        el.style.top = `${rect.top}px`;
+        
+        if (delta > 0) {
+            el.innerText = "+❤️";
+            hud.classList.add('pop-in'); 
+        } else if (delta < 0) {
+            el.innerText = "-💔";
+            document.getElementById('game-stage').classList.add('shake'); 
+            document.getElementById('char-sprite').classList.add('glitch-anim'); 
+            setTimeout(() => {
+                document.getElementById('game-stage').classList.remove('shake');
+                document.getElementById('char-sprite').classList.remove('glitch-anim');
+                hud.classList.remove('pop-in');
+            }, 500);
+        } else {
+            el.innerText = "⚪";
+        }
+
+        document.getElementById('ui-layer').appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function updateBar() {
+        const pct = Math.max(0, Math.min(100, Math.round(state.aff * 100)));
+        document.getElementById('bar').style.width = pct + '%';
+        document.getElementById('pct').innerText = pct + '%';
+        
+        const bar = document.getElementById('bar');
+        const container = document.getElementById('hud');
+        
+        if(pct > 50) {
+            bar.style.background = 'linear-gradient(90deg, #ff4757, #ff7e5f)';
+            container.style.borderColor = '#ff4757';
+            document.getElementById('game-stage').classList.remove('pulse-red');
+        } else {
+            bar.style.background = 'red';
+            container.style.borderColor = 'red';
+            if(pct < 30) document.getElementById('game-stage').classList.add('pulse-red');
+        }
+    }
+
+    function killSequence() {
+        const charImg = document.getElementById('char-sprite');
+        charImg.src = assets.killer; 
+        charImg.style.opacity = 1;
+        charImg.classList.add('yandere-mode');
+
+        document.getElementById('game-stage').classList.add('shake');
+        document.getElementById('choices').classList.add('hidden');
+        document.getElementById('hud').style.display = 'none';
+        
+        const txt = document.getElementById('text');
+        const name = document.getElementById('name');
+        name.style.display = 'block';
+        name.innerText = "Maimy";
+        txt.className = 'dialog-text';
+        txt.style.color = '#ff4757';
+        txt.style.fontWeight = 'bold';
+        txt.style.fontSize = '1.3rem';
+        txt.innerHTML = "SAYANG TAK NAK DENGAR CAKAP??<br>KALAU MACAM TU...<br>TIDURLAH SELAMANYA!!!";
+
+        setTimeout(() => {
+            document.getElementById('blood-screen').style.opacity = 1;
+            document.getElementById('end-msg').style.opacity = 1;
+            document.getElementById('dialog').style.display = 'none';
+        }, 2000);
+    }
+
+    function next() {
+        const node = story[state.node];
+        if(!node.choices && node.special !== 'die' && node.next) {
+            render(node.next);
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.code === 'Space' || e.code === 'Enter') {
+            next();
+        }
+    });
+</script>
+</body>
+</html>
+
+
