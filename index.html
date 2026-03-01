@@ -137,7 +137,15 @@
         /* OVERLAYS & ANIMATIONS */
         #blackout { background: #000; opacity: 0; transition: opacity 2s; pointer-events: none; }
         #blood-screen { background: #8a0303; mix-blend-mode: multiply; opacity: 0; transition: opacity 3s; pointer-events: none; }
-        #end-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Special Elite', cursive; font-size: 3rem; color: #ff4757; opacity: 0; text-shadow: 0 0 15px black; pointer-events: none; }
+        #end-msg { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Special Elite', cursive; font-size: 3rem; color: #ff4757; opacity: 0; text-shadow: 0 0 15px black; pointer-events: none; transition: opacity 2s; }
+        
+        /* NEXT EPISODE UPDATE MESSAGE */
+        #update-msg { 
+            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); width: 85%; text-align: center; 
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: #fff; opacity: 0; 
+            text-shadow: 0 2px 5px black; pointer-events: none; transition: opacity 2s; z-index: 100; 
+            background: rgba(0, 0, 0, 0.75); border: 1px solid #ff4757; padding: 12px; border-radius: 8px; backdrop-filter: blur(5px);
+        }
 
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         .glitch-anim { animation: glitch 0.2s 2; }
@@ -183,6 +191,7 @@
     <div id="blackout" class="absolute-fill layer-overlay"></div>
     <div id="blood-screen" class="absolute-fill layer-overlay"></div>
     <div id="end-msg" class="layer-overlay font-bold">TAMAT</div>
+    <div id="update-msg" class="layer-overlay">The Next Episode will coming in the next Update</div>
 
     <!-- Layer 5: UI -->
     <div id="ui-layer" class="absolute-fill layer-ui">
@@ -484,6 +493,15 @@
         } else {
             document.querySelector('.animate-bounce').style.display = 'block';
         }
+
+        // TUNJUK MESEJ "NEXT EPISODE" JIKA TIADA SAMBUNGAN (ENDING BIASA)
+        if(node.next === null && node.special !== 'die') {
+            setTimeout(() => {
+                document.getElementById('update-msg').style.opacity = 1;
+            }, 800);
+        } else {
+            document.getElementById('update-msg').style.opacity = 0;
+        }
     }
 
     function makeChoice(c) {
@@ -556,8 +574,6 @@
         document.getElementById('game-stage').classList.add('shake');
         document.getElementById('choices').classList.add('hidden');
         
-        // BUG FIX DI SINI: Tukar display 'none' kepada visibility 'hidden'
-        // supaya kotak dialog tidak lagi "melompat" ke atas.
         document.getElementById('hud').style.visibility = 'hidden';
         
         const txt = document.getElementById('text');
@@ -573,6 +589,7 @@
         setTimeout(() => {
             document.getElementById('blood-screen').style.opacity = 1;
             document.getElementById('end-msg').style.opacity = 1;
+            document.getElementById('update-msg').style.opacity = 0; // PASTIKAN TIDAK MUNCUL KETIKA MATI
             document.getElementById('dialog').style.display = 'none';
             document.getElementById('end-msg').innerText = "TAMAT";
         }, 2000);
