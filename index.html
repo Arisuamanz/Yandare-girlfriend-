@@ -1,539 +1,613 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rhythm Pad Sprite</title>
+    <title>Maimy: The Kidnapping</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #000;
-            font-family: 'Segoe UI', sans-serif;
-            user-select: none; touch-action: none;
+        /* BASE STYLES */
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Nunito', sans-serif; user-select: none; color: white; touch-action: manipulation; }
+        
+        /* SETUP SCREEN (MAIN MENU) */
+        #setup-screen {
+            position: absolute; inset: 0; z-index: 999; background: #0a0a0a; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 20px 20px;
+        }
+        .btn-start { 
+            background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; padding: 18px 40px; 
+            border-radius: 50px; font-weight: 900; letter-spacing: 2px; margin-top: 40px; 
+            width: 80%; max-width: 300px; transition: 0.3s; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+            text-transform: uppercase; font-size: 1.1rem; cursor: pointer;
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255, 71, 87, 0.6); }
+        .btn-start:active { transform: scale(0.95); }
+
+        /* GAME STAGE (MOBILE VERTICAL FOCUS) */
+        #game-stage { 
+            position: relative; width: 100vw; height: 100vh; max-width: 500px; margin: 0 auto; 
+            background: #000; box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow: hidden; 
         }
 
-        #game-container {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
-            background: #000;
+        /* LAYERS Z-INDEX STRUCTURE */
+        .layer-bg { z-index: 1; }
+        .layer-fx { z-index: 5; pointer-events: none; }
+        .layer-char { z-index: 10; pointer-events: none; }
+        .layer-overlay { z-index: 20; pointer-events: none; } 
+        .layer-ui { z-index: 50; pointer-events: none; } 
+
+        /* LAYERS CSS */
+        .absolute-fill { position: absolute; inset: 0; transition: all 0.5s ease; }
+        
+        #bg-layer { 
+            background-size: cover; background-position: center; filter: brightness(0.6); 
+            transform: scale(1); transition: transform 20s linear, filter 0.5s ease;
+        }
+        .ken-burns { transform: scale(1.15) !important; }
+
+        /* ATMOSPHERE OVERLAYS */
+        .vignette { position: absolute; inset: 0; background: radial-gradient(circle, transparent 40%, black 120%); z-index: 3; pointer-events: none; }
+        .scanlines {
+            position: absolute; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px; z-index: 4; pointer-events: none; opacity: 0.5;
         }
 
-        /* Video Background */
-        #bg-video {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0; object-fit: fill;
-            filter: none !important;
+        /* CHARACTER */
+        #char-layer { 
+            display: flex; align-items: flex-end; justify-content: center; 
+            bottom: -20px; transition: transform 0.5s; 
+            height: 90vh; 
+        }
+        .sprite { 
+            height: 105%; max-width: none; object-fit: contain;
+            transform-origin: bottom center;
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.9));
+            transition: filter 0.3s, opacity 0.5s;
+            /* PENINGKATAN KUALITI IMEJ */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
-        #gameCanvas {
-            position: absolute; top: 0; left: 0;
-            z-index: 10; touch-action: none;
+        /* UI ELEMENTS */
+        #ui-layer { padding: 15px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+
+        /* HUD */
+        .heart-meter { 
+            pointer-events: auto; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+            padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(255, 71, 87, 0.3);
+            display: flex; align-items: center; gap: 10px; width: fit-content;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: transform 0.2s, visibility 0s;
+            margin-top: 10px;
         }
+        .heart-icon { color: #ff4757; font-size: 1.1rem; filter: drop-shadow(0 0 5px #ff4757); }
+        .bar-bg { width: 100px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #ff7e5f); width: 50%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #ff4757; }
 
-        .ui-layer {
-            position: absolute; z-index: 20; color: white;
-            width: 100%; height: 100%; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            pointer-events: none;
-        }
-
-        .interactive { pointer-events: auto; }
-
-        #menu-screen { background: rgba(0,0,0,0.85); text-align: center; overflow-y: auto; padding: 20px 0; }
-
-        .btn-action {
-            background: linear-gradient(135deg, #00ffcc, #0088ff);
-            padding: 15px 50px; border-radius: 50px;
-            font-weight: 900; font-size: 1.5rem; border: 3px solid white;
-            cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.4); margin-top: 15px;
-            color: black;
+        /* DIALOG BOX */
+        .dialog-box { 
+            pointer-events: auto; 
+            background: rgba(15, 15, 18, 0.9); backdrop-filter: blur(10px);
+            border-top: 3px solid #ff4757; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 15px; min-height: 140px; margin-bottom: 5px; 
+            cursor: pointer; position: relative; border-radius: 12px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             transition: transform 0.1s;
         }
-        .btn-action:active { transform: scale(0.95); }
-
-        /* COMBO DISPLAY - TOP CENTER */
-        #hud-top {
-            position: absolute; top: 10px; /* Rapat ke atas */
-            left: 50%;
-            transform: translateX(-50%); 
-            z-index: 30; 
-            text-align: center; pointer-events: none;
-            display: flex; flex-direction: column; align-items: center;
+        .dialog-box:active { transform: scale(0.98); }
+        .name-tag { 
+            position: absolute; top: -14px; left: 20px; 
+            background: linear-gradient(45deg, #ff4757, #d63031); color: white; 
+            padding: 4px 16px; font-weight: 900; font-size: 0.85rem; 
+            border-radius: 6px; transform: skew(-8deg);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.4); text-transform: uppercase;
         }
+        .dialog-text { font-size: 1rem; line-height: 1.5; color: #f1f1f1; text-shadow: 1px 1px 2px black; }
+        .narrator-text { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: #ccc; font-style: italic; text-align: center; margin-top: 25px; }
 
-        .combo-num {
-            font-size: 3rem; 
-            font-weight: 900; font-style: italic;
-            line-height: 1; text-shadow: 0 0 15px rgba(0,0,0,1), 0 0 8px #ff0077;
-            color: white;
-            transition: transform 0.05s;
+        /* CHOICES CONTAINER */
+        .choices-wrapper { 
+            pointer-events: auto; 
+            display: flex; flex-direction: column; gap: 8px; 
+            position: absolute; 
+            bottom: 220px; 
+            left: 50%; transform: translateX(-50%); 
+            width: 90%; max-width: 400px; 
+            z-index: 100;
         }
-
-        .combo-label {
-            font-size: 0.8rem; 
-            font-weight: 900; letter-spacing: 4px;
-            color: #ff0077; text-shadow: 0 0 8px rgba(0,0,0,1);
-            margin-top: 2px;
+        .choice-btn { 
+            background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(10px); 
+            color: #fff; padding: 14px 16px; border-radius: 10px; 
+            font-weight: 700; text-align: left; border-left: 4px solid #555; 
+            font-size: 0.95rem; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.05);
         }
+        .choice-btn:active { background: #ff4757; color: white; transform: scale(0.97); }
 
-        .hidden { display: none !important; }
+        /* FEEDBACK POPUPS */
+        .floating-text {
+            position: absolute; font-weight: 900; font-size: 1.8rem; 
+            pointer-events: none; z-index: 50; text-shadow: 0 2px 5px black;
+            animation: floatUp 1s forwards;
+        }
+        .ft-good { color: #2ed573; }
+        .ft-bad { color: #ff4757; }
+
+        /* OVERLAYS & ANIMATIONS */
+        #blackout { background: #000; opacity: 0; transition: opacity 2s; pointer-events: none; }
+        #blood-screen { background: #8a0303; mix-blend-mode: multiply; opacity: 0; transition: opacity 3s; pointer-events: none; }
+        #end-msg { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Special Elite', cursive; font-size: 3rem; color: #ff4757; opacity: 0; text-shadow: 0 0 15px black; pointer-events: none; transition: opacity 2s; }
         
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-            100% { transform: translateX(0); }
+        /* NEXT EPISODE UPDATE MESSAGE */
+        #update-msg { 
+            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); width: 85%; text-align: center; 
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: #fff; opacity: 0; 
+            text-shadow: 0 2px 5px black; pointer-events: none; transition: opacity 2s; z-index: 100; 
+            background: rgba(0, 0, 0, 0.75); border: 1px solid #ff4757; padding: 12px; border-radius: 8px; backdrop-filter: blur(5px);
         }
-        .fail-shake { animation: shake 0.2s ease-in-out; color: red !important; }
 
-        .upload-section {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px 15px; border-radius: 15px;
-            margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            width: 85%; max-width: 350px;
-        }
-        
-        .upload-label { font-size: 0.65rem; margin-bottom: 5px; font-weight: bold; color: rgba(255,255,255,0.8); text-transform: uppercase; }
-        .upload-input { font-size: 0.7rem; width: 100%; color: white; cursor: pointer; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 5px; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        .glitch-anim { animation: glitch 0.2s 2; }
+        .pulse-red { animation: pulseRed 2s infinite; }
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .yandere-mode { filter: contrast(1.5) sepia(0.5) hue-rotate(-50deg) brightness(0.6) !important; }
+
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(20px) scale(0.5); } 20% { opacity: 1; transform: translateY(0) scale(1.2); } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
+        @keyframes glitch { 0% { transform: translate(0) } 20% { transform: translate(-5px, 5px) filter: hue-rotate(90deg); } 40% { transform: translate(-5px, -5px) } 60% { transform: translate(5px, 5px) } 80% { transform: translate(5px, -5px) } 100% { transform: translate(0) } }
+        @keyframes pulseRed { 0% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 60px rgba(255,0,0,0.6); } 100% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <video id="bg-video" loop playsinline crossorigin="anonymous"></video>
-    <canvas id="gameCanvas"></canvas>
+<!-- SETUP SCREEN / MAIN MENU -->
+<div id="setup-screen">
+    <div class="max-w-md w-full m-auto text-center px-4">
+        <h1 class="text-5xl text-red-500 font-black mb-1 tracking-tighter drop-shadow-lg" style="font-family: 'Special Elite', cursive;">MAIMY</h1>
+        <h2 class="text-xl text-white font-bold tracking-widest mb-8">KIDNAPPED</h2>
+        <p class="text-xs text-gray-500 mb-8 max-w-xs mx-auto">Amaran: Permainan ini mengandungi tema seram psikologi.</p>
+        <button id="btn-start" class="btn-start" onclick="initGame()">MULA EPISOD</button>
+    </div>
+</div>
 
-    <!-- UI ATAS (COMBO) -->
-    <div id="hud-top" class="hidden">
-        <div id="combo-text" class="combo-num">0</div>
-        <div class="combo-label">COMBO</div>
+<!-- GAME STAGE -->
+<div id="game-stage">
+    <!-- Layer 1: Background -->
+    <div id="bg-layer" class="absolute-fill layer-bg"></div>
+    
+    <!-- Layer 2: Atmosphere -->
+    <div class="absolute-fill layer-fx" style="background: radial-gradient(circle, transparent 50%, black 120%); z-index: 5;"></div>
+    <div class="scanlines layer-fx"></div>
+    <div class="vignette layer-fx"></div>
+    
+    <!-- Layer 3: Character -->
+    <div id="char-layer" class="absolute-fill layer-char">
+        <img id="char-sprite" class="sprite" src="" alt="Character">
     </div>
 
-    <!-- MENU UTAMA -->
-    <div id="menu-screen" class="ui-layer interactive">
-        <h1 class="text-4xl font-black italic mb-2 text-[#00ffcc] drop-shadow-md">PAD RHYTHM</h1>
-        <p class="text-[10px] text-white/50 italic mb-4">Sprites are now your dance pads!</p>
-        
-        <div class="upload-section">
-            <p class="upload-label">1. Video Background (.mp4)</p>
-            <input type="file" id="video-upload" accept="video/*" class="upload-input">
+    <!-- Layer 4: Overlays -->
+    <div id="blackout" class="absolute-fill layer-overlay"></div>
+    <div id="blood-screen" class="absolute-fill layer-overlay"></div>
+    <div id="end-msg" class="layer-overlay font-bold">TAMAT</div>
+    <div id="update-msg" class="layer-overlay">The Next Episode will coming in the next Update</div>
+
+    <!-- Layer 5: UI -->
+    <div id="ui-layer" class="absolute-fill layer-ui">
+        <!-- HUD -->
+        <div class="heart-meter pop-in" id="hud">
+            <span class="heart-icon animate-pulse">❤</span>
+            <div class="bar-bg"><div id="bar" class="bar-fill"></div></div>
+            <span id="pct" class="font-mono text-xs font-bold text-gray-300">50%</span>
         </div>
 
-        <div class="upload-section">
-            <p class="upload-label">2. Center Combo Sprite (5x5)</p>
-            <input type="file" id="sprite-center-upload" accept="image/*" class="upload-input">
-        </div>
+        <!-- Choices -->
+        <div id="choices" class="choices-wrapper hidden"></div>
 
-        <div class="upload-section">
-            <p class="upload-label">3. Left Pad Sprite (5x5)</p>
-            <input type="file" id="sprite-left-upload" accept="image/*" class="upload-input">
+        <!-- Dialog Box -->
+        <div id="dialog" class="dialog-box pop-in" onclick="next()">
+            <div id="name" class="name-tag">NAMA</div>
+            <p id="text" class="dialog-text">...</p>
+            <div class="text-right text-[10px] text-gray-500 mt-3 animate-bounce uppercase tracking-widest">Ketik untuk teruskan</div>
         </div>
-
-        <div class="upload-section">
-            <p class="upload-label">4. Right Pad Sprite (5x5)</p>
-            <input type="file" id="sprite-right-upload" accept="image/*" class="upload-input">
-        </div>
-        
-        <button id="start-btn" class="btn-action opacity-50 cursor-not-allowed" disabled>PLAY NOW</button>
     </div>
 </div>
 
 <script>
-/**
- * PEMBOLEHUBAH GLOBAL & KEDUDUKAN STATIK
- */
-const container = document.getElementById('game-container');
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const video = document.getElementById('bg-video');
+    // ==========================================
+    // ASSETS DB (GAMBAR DIRECT LINK)
+    // ==========================================
+    const assets = { 
+        street: 'https://i.postimg.cc/MTKZPHg5/f3a8d9d608f5067c2729218da7d07410.jpg', 
+        room: 'https://i.postimg.cc/SQdCxzyq/fbe0177706efcdcab5cb12fd6a59cbe0.jpg',   
+        normal: 'https://i.postimg.cc/Yq2N6zXq/413636.png', 
+        killer: 'https://i.postimg.cc/bvqqrdYh/402061.png'  
+    };
 
-const videoUpload = document.getElementById('video-upload');
-const spriteCenterUpload = document.getElementById('sprite-center-upload');
-const spriteLeftUpload = document.getElementById('sprite-left-upload');
-const spriteRightUpload = document.getElementById('sprite-right-upload');
+    let state = { node: 'intro_walk', aff: 0.5 };
 
-const startBtn = document.getElementById('start-btn');
-const hud = document.getElementById('hud-top');
-const comboEl = document.getElementById('combo-text');
+    // STORY DATA 
+    const story = {
+        // --- HARI 1 ---
+        'intro_walk': {
+            bg: 'street', sprite: null, narrator: true,
+            text: "Jam menunjukkan pukul 11 malam. Anda berjalan pulang dari kedai serbaneka melalui lorong yang sunyi.",
+            next: 'kidnap_moment'
+        },
+        'kidnap_moment': {
+            bg: 'street', sprite: null, narrator: true,
+            text: "Bunyi cengkerik menemani langkah anda. Tiba-tiba, anda terdengar bunyi tapak kaki laju di belakang anda.",
+            next: 'blackout_hit'
+        },
+        'blackout_hit': {
+            special: 'blackout', narrator: true,
+            text: "GEDEBUK!!\n\nSatu pukulan kuat hinggap di kepala anda. Pandangan anda menjadi gelap serta-merta.",
+            next: 'wakeup_room'
+        },
+        'wakeup_room': {
+            bg: 'room', sprite: null, narrator: true, special: 'fadein',
+            text: "Kepala anda berdenyut sakit. Anda membuka mata perlahan-lahan.\n\nIni... bukan bilik anda. Tangan anda terikat pada kepala katil.",
+            next: 'maimy_enter'
+        },
+        'maimy_enter': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Selamat pagi, sayang! Nyenyak awak tidur? Saya risau tau awak tak bangun-bangun dari semalam.",
+            next: 'first_choice'
+        },
+        'first_choice': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Jangan risau, saya ikat awak longgar je. Supaya awak tak 'sesat' lagi macam semalam.",
+            choices: [
+                { text: "Lepaskan aku! Siapa kau?!", delta: -0.3, next: 'path_angry' },
+                { text: "Kepala saya sakit... air...", delta: 0.1, next: 'path_calm' }
+            ]
+        },
+        'path_angry': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Shhh... jangan jerit. Jiran tak suka bising. Saya Maimy. Dan mulai hari ni, saya penjaga awak. Faham?",
+            choices: [
+                { text: "Kau gila! Aku nak balik!", delta: -0.4, next: 'trigger_death' },
+                { text: "Baik... saya faham.", delta: 0.1, next: 'path_calm' }
+            ]
+        },
+        'path_calm': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Kesiannya... mesti sakit kan kena pukul semalam? Maaf ya, saya terpaksa. Kalau tak, awak takkan ikut saya balik.",
+            next: 'feeding_time'
+        },
+        'feeding_time': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Nah, saya masak bubur. Buka mulut... Aaaa...",
+            choices: [
+                { text: "(Makan) Terima kasih, Maimy.", delta: 0.2, next: 'day_1_end' },
+                { text: "(Ludah makanan) Aku tak nak makanan kau!", delta: -0.5, next: 'trigger_death' }
+            ]
+        },
+        'day_1_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "Anda memilih untuk patuh. Maimy tersenyum puas dan menyuapkan makanan sehingga habis. Malam pun berlabuh...",
+            next: 'day_2_start'
+        },
 
-let combo = 0;
-let isPlaying = false, lastTime = 0, beatCooldown = 0;
-let notes = []; 
+        // --- HARI 2: ISOLATION ---
+        'day_2_start': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Keesokan harinya... Maimy bersiap sedia dengan beg tangan. Dia kelihatan ceria.",
+            next: 'maimy_leaving'
+        },
+        'maimy_leaving': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Saya kena keluar beli barang dapur sekejap. Saya tak ikat awak hari ni, tapi pintu saya dah kunci. Jangan nakal-nakal ya?",
+            choices: [
+                { text: "Okay, hati-hati.", delta: 0.1, next: 'alone_start' },
+                { text: "Bawa aku sekali!", delta: -0.2, next: 'alone_angry' }
+            ]
+        },
+        'alone_angry': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Tak boleh! Dunia luar bahaya. Awak duduk sini diam-diam. Nanti saya belikan gula-gula.",
+            next: 'alone_start'
+        },
+        'alone_start': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Maimy keluar dan mengunci pintu. Anda kini keseorangan di dalam bilik.",
+            next: 'exploration_choice'
+        },
+        'exploration_choice': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Apa yang anda mahu lakukan?",
+            choices: [
+                { text: "Geledah Laci Meja", delta: 0, next: 'check_drawer' },
+                { text: "Periksa Tingkap", delta: 0, next: 'check_window' }
+            ]
+        },
+        'check_drawer': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Anda menjumpai sebuah diari lama. Isinya penuh dengan gambar anda yang diambil secara senyap sejak setahun lalu. 'Dia akhirnya milikku...', tulisnya.",
+            next: 'maimy_return_sound'
+        },
+        'check_window': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "Tingkap itu dipaku dengan papan tebal dari luar. Mustahil untuk dibuka tanpa alatan berat. Anda terperangkap.",
+            next: 'maimy_return_sound'
+        },
+        'maimy_return_sound': {
+            bg: 'room', sprite: null, narrator: true,
+            text: "KLIK! Bunyi kunci pintu dibuka. Maimy sudah pulang lebih awal dari jangkaan!",
+            next: 'gift_scene'
+        },
 
-// KEDUDUKAN PAD (Dikira semasa resize)
-let fixedY = 0;
-let leftX = 0;
-let rightX = 0;
-const PAD_SIZE = 165; // Saiz Gergasi yang diminta
+        // --- HADIAH ISTIMEWA ---
+        'gift_scene': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Saya dah balik! Rindu saya tak? Saya ada belikan hadiah istimewa untuk awak.",
+            choices: [
+                { text: "Hadiah apa?", delta: 0.1, next: 'gift_reveal' },
+                { text: "Aku tak nak hadiah kau.", delta: -0.2, next: 'gift_reveal_force' }
+            ]
+        },
+        'gift_reveal': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Nah... (Dia mengeluarkan rantai leher berloceng). Pakai ni? Supaya saya tahu mana awak pergi dalam rumah ni.",
+            next: 'wear_collar_choice'
+        },
+        'gift_reveal_force': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Jangan sombong. Nah, pakai rantai ni. Kalau tak, saya ikat awak balik kat katil.",
+            next: 'wear_collar_choice'
+        },
+        'wear_collar_choice': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "(Maimy memegang rantai itu sambil tersenyum menakutkan)",
+            choices: [
+                { text: "(Pakai) Cantik...", delta: 0.3, next: 'true_love_dinner' },
+                { text: "(Lempar) Aku bukan anjing kau!", delta: -0.5, next: 'trigger_death' }
+            ]
+        },
 
-// SPRITE: CENTER (Background Combo)
-let spriteCenter = new Image();
-let isSpriteCenterLoaded = false;
-let frameCenter = 0;
-let timerCenter = 0;
-
-// SPRITE: LEFT PAD
-let spriteLeft = new Image();
-let isSpriteLeftLoaded = false;
-let frameLeft = 0;
-let timerLeft = 0;
-
-// SPRITE: RIGHT PAD
-let spriteRight = new Image();
-let isSpriteRightLoaded = false;
-let frameRight = 0;
-let timerRight = 0;
-
-let currentFPS = 1;
-
-// AUDIO
-let audioCtx, analyser, source, dataArray;
-let isAudioInitialized = false;
-
-function resize() {
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-    
-    // Tetapkan koordinat statik untuk Pad/Butang
-    fixedY = canvas.height * 0.65;
-    
-    // Pastikan pad tidak terkeluar dari skrin
-    const padding = Math.max(85, canvas.width * 0.2); 
-    leftX = padding;
-    rightX = canvas.width - padding;
-}
-window.addEventListener('resize', resize);
-resize();
-
-// MUAT NAIK FAIL
-videoUpload.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        video.src = URL.createObjectURL(file);
-        checkReady();
-    }
-};
-
-spriteCenterUpload.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        spriteCenter.src = URL.createObjectURL(file);
-        spriteCenter.onload = () => { isSpriteCenterLoaded = true; checkReady(); };
-    }
-};
-
-spriteLeftUpload.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        spriteLeft.src = URL.createObjectURL(file);
-        spriteLeft.onload = () => { isSpriteLeftLoaded = true; checkReady(); };
-    }
-};
-
-spriteRightUpload.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        spriteRight.src = URL.createObjectURL(file);
-        spriteRight.onload = () => { isSpriteRightLoaded = true; checkReady(); };
-    }
-};
-
-function checkReady() {
-    if (video.src) {
-        startBtn.disabled = false;
-        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
-}
-
-function initAudio() {
-    if (isAudioInitialized) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioCtx.createAnalyser();
-    source = audioCtx.createMediaElementSource(video);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    analyser.fftSize = 256;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    isAudioInitialized = true;
-}
-
-/**
- * KELAS NOTA (VISUAL SANGAT KECIL)
- */
-class Note {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+        // --- MAKAN MALAM & ENDINGS ---
+        'true_love_dinner': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Anak yang baik... Jom makan? Saya masak daging istimewa hari ni.",
+            next: 'meat_joke'
+        },
+        'meat_joke': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Sedap tak? Daging ni... dari orang yang cuba kacau awak minggu lepas.",
+            choices: [
+                { text: "Apa?! (Muntah)", delta: -0.2, next: 'joke_reveal' },
+                { text: "Sedap... terima kasih.", delta: 0.4, next: 'stockholm_end' }
+            ]
+        },
+        'joke_reveal': {
+            bg: 'room', sprite: 'normal', name: 'Maimy',
+            text: "Hahaha! Gurau je lah. Tu daging lembu. Awak ni comel bila takut. Jom tidur?",
+            next: 'survival_end'
+        },
         
-        // VISUAL BUTANG SANGAT KECIL
-        this.visualRadius = 12; 
-        
-        // HITBOX KEKAL BESAR
-        this.hitboxRadius = 70; 
-        
-        this.approachRadius = 180;
-        this.life = 1.0;
-        this.shrinkSpeed = 0.33; // Santai (~3 saat)
-        this.isFinished = false;
-        
-        this.color = this.x < canvas.width/2 ? '#ff0077' : '#00ffcc';
+        'trigger_death': { special: 'die' },
+        'stockholm_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "[ TRUE YANDERE ENDING ]\nAnda menerima kegilaan Maimy. Anda berdua hidup bahagia dalam dunia kecil ini... selamanya.",
+            next: null
+        },
+        'survival_end': {
+            bg: 'room', sprite: 'normal', narrator: true,
+            text: "[ SURVIVAL ENDING ]\nAnda terselamat untuk satu lagi hari. Tetapi adakah anda akan bebas? Mungkin tidak.",
+            next: null
+        }
+    };
+
+    // ENGINE
+    function initGame() {
+        document.getElementById('setup-screen').style.display = 'none';
+        render('intro_walk');
+        updateBar();
     }
 
-    update(dt) {
-        this.life -= this.shrinkSpeed * dt;
-        this.approachRadius = this.visualRadius + (150 * this.life);
+    function render(id) {
+        const node = story[id];
+        if(!node) return;
+        state.node = id;
+
+        // ANIMATE BG (Slow Zoom)
+        const bgLayer = document.getElementById('bg-layer');
+        bgLayer.classList.remove('ken-burns');
+        void bgLayer.offsetWidth; // Trigger reflow
+        bgLayer.classList.add('ken-burns');
+
+        // EFFECTS & OVERLAYS
+        const blackout = document.getElementById('blackout');
+        if(node.special === 'blackout') {
+            blackout.style.opacity = 1;
+        } else if(node.special === 'fadein') {
+            blackout.style.opacity = 0;
+            setTimeout(() => { if(node.special==='fadein') blackout.style.display = 'none'; }, 2000);
+        } else {
+             blackout.style.display = 'none';
+        }
         
-        if (this.life <= 0) {
-            this.isFinished = true;
-            resetCombo(); 
+        if(node.special === 'die') { killSequence(); return; }
+
+        // UPDATE BACKGROUND URLS FROM ASSETS DB
+        if(node.bg === 'street') bgLayer.style.backgroundImage = `url('${assets.street}')`;
+        if(node.bg === 'room') bgLayer.style.backgroundImage = `url('${assets.room}')`;
+
+        // UPDATE SPRITE URLS FROM ASSETS DB
+        const charImg = document.getElementById('char-sprite');
+        if(node.sprite === 'normal') {
+            charImg.src = assets.normal;
+            charImg.style.opacity = 1;
+            charImg.classList.remove('yandere-mode');
+        } else if (node.sprite === 'killer') {
+            charImg.src = assets.killer;
+            charImg.style.opacity = 1;
+            charImg.classList.add('yandere-mode');
+        } else {
+            charImg.style.opacity = 0;
+        }
+
+        // TEXT & UI
+        const nameTag = document.getElementById('name');
+        const txt = document.getElementById('text');
+        const choices = document.getElementById('choices');
+        const dialogBox = document.getElementById('dialog');
+        
+        choices.classList.add('hidden');
+        choices.innerHTML = '';
+        dialogBox.classList.remove('pop-in');
+        void dialogBox.offsetWidth;
+        dialogBox.classList.add('pop-in');
+
+        if(node.narrator) {
+            nameTag.style.display = 'none';
+            txt.className = 'narrator-text';
+            txt.innerText = node.text;
+        } else {
+            nameTag.style.display = 'block';
+            nameTag.innerText = node.name || "MAIMY";
+            txt.className = 'dialog-text';
+            txt.innerText = node.text;
+        }
+
+        // CHOICES GENERATION
+        if(node.choices) {
+            document.querySelector('.animate-bounce').style.display = 'none';
+            node.choices.forEach((c, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'choice-btn pop-in';
+                btn.style.animationDelay = `${index * 0.1}s`;
+                btn.innerText = c.text;
+                
+                // Mobile Touch Handling
+                btn.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault(); 
+                    makeChoice(c); 
+                });
+                
+                choices.appendChild(btn);
+            });
+            choices.classList.remove('hidden');
+        } else {
+            document.querySelector('.animate-bounce').style.display = 'block';
+        }
+
+        // TUNJUK MESEJ "NEXT EPISODE" JIKA TIADA SAMBUNGAN (ENDING BIASA)
+        if(node.next === null && node.special !== 'die') {
+            setTimeout(() => {
+                document.getElementById('update-msg').style.opacity = 1;
+            }, 800);
+        } else {
+            document.getElementById('update-msg').style.opacity = 0;
         }
     }
 
-    draw() {
-        const op = Math.max(0, this.life);
+    function makeChoice(c) {
+        state.aff += c.delta;
+        updateBar();
+        showFeedback(c.delta);
+
+        if(state.aff <= 0.01) { // Floating point safeguard
+            killSequence();
+        } else {
+            if(c.next) render(c.next);
+        }
+    }
+
+    // VISUAL FEEDBACK
+    function showFeedback(delta) {
+        const hud = document.getElementById('hud');
+        const el = document.createElement('div');
+        el.className = `floating-text ${delta >= 0 ? 'ft-good' : 'ft-bad'}`;
         
-        // Cincin masa
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.approachRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${op})`;
-        ctx.lineWidth = 4;
-        ctx.stroke();
+        const rect = hud.getBoundingClientRect();
+        el.style.left = `${rect.right + 10}px`;
+        el.style.top = `${rect.top}px`;
+        
+        if (delta > 0) {
+            el.innerText = "+❤";
+            hud.classList.add('pop-in'); 
+        } else if (delta < 0) {
+            el.innerText = "-💔";
+            document.getElementById('game-stage').classList.add('shake'); 
+            document.getElementById('char-sprite').classList.add('glitch-anim'); 
+            setTimeout(() => {
+                document.getElementById('game-stage').classList.remove('shake');
+                document.getElementById('char-sprite').classList.remove('glitch-anim');
+                hud.classList.remove('pop-in');
+            }, 500);
+        } else {
+            el.innerText = "⚪";
+        }
 
-        // Titik Butang Sangat Kecil
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.visualRadius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.color;
-        ctx.fill();
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-    }
-}
-
-/**
- * LOGIK LUKISAN SPRITE
- */
-function drawSprites(dt) {
-    // KELAJUAN: 0-3 = 1 FPS, 4-7 = 2 FPS...
-    let calculatedFPS = Math.floor(combo / 4) + 1;
-    currentFPS = Math.min(60, calculatedFPS); 
-
-    // UPDATE TIMERS
-    if (isSpriteCenterLoaded) {
-        timerCenter += dt;
-        if (timerCenter > (1 / currentFPS)) { frameCenter = (frameCenter + 1) % 25; timerCenter = 0; }
-    }
-    if (isSpriteLeftLoaded) {
-        timerLeft += dt;
-        if (timerLeft > (1 / currentFPS)) { frameLeft = (frameLeft + 1) % 25; timerLeft = 0; }
-    }
-    if (isSpriteRightLoaded) {
-        timerRight += dt;
-        if (timerRight > (1 / currentFPS)) { frameRight = (frameRight + 1) % 25; timerRight = 0; }
+        document.getElementById('ui-layer').appendChild(el);
+        setTimeout(() => el.remove(), 1000);
     }
 
-    // 1. LUKIS CENTER SPRITE (Background Combo) - Rapat ke atas skrin
-    if (isSpriteCenterLoaded) {
-        const fW = spriteCenter.width / 5;
-        const fH = spriteCenter.height / 5;
-        const drawW = PAD_SIZE; 
-        const drawH = (fH / fW) * drawW;
-        const centerX = canvas.width / 2;
-
-        // Y diubah ke 0 supaya rapat sangat dengan "top edge"
-        ctx.drawImage(
-            spriteCenter,
-            (frameCenter % 5) * fW, Math.floor(frameCenter / 5) * fH, fW, fH,
-            centerX - (drawW / 2), 0, drawW, drawH
-        );
-    }
-
-    // 2. LUKIS LEFT PAD SPRITE
-    if (isSpriteLeftLoaded) {
-        const fW = spriteLeft.width / 5;
-        const fH = spriteLeft.height / 5;
-        const drawW = PAD_SIZE; 
-        const drawH = (fH / fW) * drawW;
-
-        ctx.drawImage(
-            spriteLeft,
-            (frameLeft % 5) * fW, Math.floor(frameLeft / 5) * fH, fW, fH,
-            leftX - (drawW / 2), fixedY - (drawH / 2), drawW, drawH
-        );
-    }
-
-    // 3. LUKIS RIGHT PAD SPRITE
-    if (isSpriteRightLoaded) {
-        const fW = spriteRight.width / 5;
-        const fH = spriteRight.height / 5;
-        const drawW = PAD_SIZE; 
-        const drawH = (fH / fW) * drawW;
-
-        ctx.drawImage(
-            spriteRight,
-            (frameRight % 5) * fW, Math.floor(frameRight / 5) * fH, fW, fH,
-            rightX - (drawW / 2), fixedY - (drawH / 2), drawW, drawH
-        );
-    }
-}
-
-/**
- * ENJIN PERMAINAN
- */
-function startGame() {
-    initAudio();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    video.muted = false;
-    video.volume = 1.0;
-    video.style.filter = "none";
-    
-    combo = 0; notes = [];
-    isPlaying = true;
-    updateComboUI();
-    
-    document.getElementById('menu-screen').classList.add('hidden');
-    hud.classList.remove('hidden');
-
-    video.currentTime = 0;
-    video.play();
-    
-    lastTime = performance.now();
-    requestAnimationFrame(gameLoop);
-}
-
-function gameLoop(currentTime) {
-    if (!isPlaying) return;
-    const dt = (currentTime - lastTime) / 1000;
-    lastTime = currentTime;
-
-    update(dt);
-    render(dt);
-    requestAnimationFrame(gameLoop);
-}
-
-function update(dt) {
-    beatCooldown -= dt;
-
-    if (analyser && isPlaying) {
-        analyser.getByteFrequencyData(dataArray);
-        let bass = 0;
-        for (let i = 0; i < 5; i++) bass += dataArray[i];
-        bass /= 5;
-
-        if (bass > 215 && beatCooldown <= 0) {
-            spawnNote();
-            beatCooldown = 0.35; 
-            
-            video.style.filter = "brightness(1.5) saturate(1.2)";
-            setTimeout(() => { if(isPlaying) video.style.filter = "none"; }, 80);
+    function updateBar() {
+        const pct = Math.max(0, Math.min(100, Math.round(state.aff * 100)));
+        document.getElementById('bar').style.width = pct + '%';
+        document.getElementById('pct').innerText = pct + '%';
+        
+        const bar = document.getElementById('bar');
+        const container = document.getElementById('hud');
+        
+        if(pct > 50) {
+            bar.style.background = 'linear-gradient(90deg, #ff4757, #ff7e5f)';
+            container.style.borderColor = 'rgba(255, 71, 87, 0.5)';
+            document.getElementById('game-stage').classList.remove('pulse-red');
+        } else {
+            bar.style.background = '#e84118';
+            container.style.borderColor = '#e84118';
+            if(pct < 30) document.getElementById('game-stage').classList.add('pulse-red');
         }
     }
 
-    for (let i = notes.length - 1; i >= 0; i--) {
-        notes[i].update(dt);
-        if (notes[i].isFinished) notes.splice(i, 1);
+    function killSequence() {
+        const charImg = document.getElementById('char-sprite');
+        charImg.src = assets.killer; 
+        charImg.style.opacity = 1;
+        charImg.classList.add('yandere-mode');
+
+        document.getElementById('game-stage').classList.add('shake');
+        document.getElementById('choices').classList.add('hidden');
+        
+        document.getElementById('hud').style.visibility = 'hidden';
+        
+        const txt = document.getElementById('text');
+        const name = document.getElementById('name');
+        name.style.display = 'block';
+        name.innerText = "MAIMY";
+        txt.className = 'dialog-text';
+        txt.style.color = '#ff4757';
+        txt.style.fontWeight = '900';
+        txt.style.fontSize = '1.3rem';
+        txt.innerHTML = "SAYANG TAK NAK DENGAR CAKAP??<br>KALAU MACAM TU...<br>TIDURLAH SELAMANYA!!!";
+
+        setTimeout(() => {
+            document.getElementById('blood-screen').style.opacity = 1;
+            document.getElementById('end-msg').style.opacity = 1;
+            document.getElementById('update-msg').style.opacity = 0; // PASTIKAN TIDAK MUNCUL KETIKA MATI
+            document.getElementById('dialog').style.display = 'none';
+            document.getElementById('end-msg').innerText = "TAMAT";
+        }, 2000);
     }
-}
 
-function spawnNote() {
-    const isLeft = Math.random() > 0.5;
-    const x = isLeft ? leftX : rightX;
-    
-    notes.push(new Note(x, fixedY));
-}
-
-function render(dt) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    drawSprites(dt);
-
-    for (let i = notes.length - 1; i >= 0; i--) {
-        notes[i].draw();
-    }
-}
-
-/**
- * PENGENDALIAN INPUT
- */
-function handleInput(ex, ey) {
-    if (!isPlaying) return;
-    const rect = canvas.getBoundingClientRect();
-    const tx = ex - rect.left;
-    const ty = ey - rect.top;
-
-    let hitIdx = -1;
-    for (let i = 0; i < notes.length; i++) {
-        const n = notes[i];
-        const d = Math.hypot(tx - n.x, ty - n.y);
-        if (d < n.hitboxRadius) {
-            hitIdx = i;
-            break; 
+    function next() {
+        const node = story[state.node];
+        if(!node.choices && node.special !== 'die' && node.next) {
+            render(node.next);
         }
     }
 
-    if (hitIdx !== -1) {
-        combo++;
-        notes.splice(hitIdx, 1);
-        updateComboUI();
-        playSFX(800);
-    } else {
-        resetCombo();
-    }
-}
-
-function resetCombo() {
-    if (combo === 0) return;
-    combo = 0;
-    updateComboUI(true);
-    playSFX(150, 'sawtooth');
-    
-    container.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-    setTimeout(() => container.style.backgroundColor = 'black', 100);
-}
-
-function updateComboUI(isFail = false) {
-    comboEl.innerText = combo;
-    if (isFail) {
-        comboEl.classList.add('fail-shake');
-        setTimeout(() => comboEl.classList.remove('fail-shake'), 300);
-    } else {
-        comboEl.style.transform = "scale(1.2)";
-        setTimeout(() => comboEl.style.transform = "scale(1)", 50);
-    }
-}
-
-function playSFX(freq, type = 'sine') {
-    if (!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + 0.1);
-}
-
-// MULTITOUCH ACARA
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    for (let t of e.changedTouches) handleInput(t.clientX, t.clientY);
-}, { passive: false });
-
-canvas.addEventListener('mousedown', (e) => handleInput(e.clientX, e.clientY));
-
-startBtn.onclick = startGame;
+    // Key Listener
+    document.addEventListener('keydown', (e) => {
+        if(e.code === 'Space' || e.code === 'Enter') {
+            next();
+        }
+    });
 </script>
 </body>
 </html>
