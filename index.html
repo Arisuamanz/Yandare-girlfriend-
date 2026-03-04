@@ -18,9 +18,44 @@
         }
         .btn-start { 
             background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; padding: 18px 40px; 
-            border-radius: 50px; font-weight: 900; letter-spacing: 2px; margin-top: 40px; 
+            border-radius: 50px; font-weight: 900; letter-spacing: 2px;
             width: 80%; max-width: 300px; transition: 0.3s; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
             text-transform: uppercase; font-size: 1.1rem; cursor: pointer;
+        }
+        .menu-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+        .btn-continue {
+            background: linear-gradient(45deg, #2f3542, #57606f);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+        }
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .lang-btn {
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+            color: #ddd;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-btn.active {
+            color: #fff;
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.25);
+            box-shadow: 0 0 14px rgba(255, 71, 87, 0.35);
         }
         .btn-start:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255, 71, 87, 0.6); }
         .btn-start:active { transform: scale(0.95); }
@@ -81,9 +116,26 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: transform 0.2s, visibility 0s;
             margin-top: 10px;
         }
-        .heart-icon { color: #ff4757; font-size: 1.1rem; filter: drop-shadow(0 0 5px #ff4757); }
+        .heart-icon { color: #ff4757; font-size: 1.1rem; filter: drop-shadow(0 0 5px #ff4757); transition: transform 0.2s, filter 0.2s; }
         .bar-bg { width: 100px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
         .bar-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #ff7e5f); width: 50%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #ff4757; }
+        .hud-good { animation: hudGood 0.45s ease; border-color: rgba(46, 213, 115, 0.9) !important; }
+        .hud-bad { animation: hudBad 0.45s ease; border-color: rgba(255, 71, 87, 0.95) !important; }
+        .bar-surge { animation: barSurge 0.45s ease; }
+        .bar-drain { animation: barDrain 0.45s ease; }
+        .heart-beat { animation: heartBeatBurst 0.45s ease; }
+        .heart-alert { animation: heartAlert 0.45s ease; }
+        .hud-spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 80;
+            animation: hudSpark 0.7s ease-out forwards;
+        }
+        .spark-good { background: #2ed573; box-shadow: 0 0 8px #2ed573; }
+        .spark-bad { background: #ff4757; box-shadow: 0 0 8px #ff4757; }
 
         /* DIALOG BOX */
         .dialog-box { 
@@ -139,12 +191,13 @@
         #blood-screen { background: #8a0303; mix-blend-mode: multiply; opacity: 0; transition: opacity 3s; pointer-events: none; }
         #end-msg { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Special Elite', cursive; font-size: 3rem; color: #ff4757; opacity: 0; text-shadow: 0 0 15px black; pointer-events: none; transition: opacity 2s; }
         
-        /* NEXT EPISODE UPDATE MESSAGE */
+        /* ENDING CONTINUE BUTTON */
         #update-msg { 
             position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); width: 85%; text-align: center; 
             font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: #fff; opacity: 0; 
-            text-shadow: 0 2px 5px black; pointer-events: none; transition: opacity 2s; z-index: 100; 
+            text-shadow: 0 2px 5px black; pointer-events: none; transition: opacity 0.4s ease; z-index: 100; 
             background: rgba(0, 0, 0, 0.75); border: 1px solid #ff4757; padding: 12px; border-radius: 8px; backdrop-filter: blur(5px);
+            cursor: pointer;
         }
 
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
@@ -155,7 +208,14 @@
 
         @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(20px) scale(0.5); } 20% { opacity: 1; transform: translateY(0) scale(1.2); } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
-        @keyframes glitch { 0% { transform: translate(0) } 20% { transform: translate(-5px, 5px) filter: hue-rotate(90deg); } 40% { transform: translate(-5px, -5px) } 60% { transform: translate(5px, 5px) } 80% { transform: translate(5px, -5px) } 100% { transform: translate(0) } }
+        @keyframes hudGood { 0% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.5); } 50% { transform: scale(1.08); box-shadow: 0 0 25px rgba(46, 213, 115, 0.55); } 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.5); } }
+        @keyframes hudBad { 0% { transform: translateX(0); } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
+        @keyframes barSurge { 0% { filter: brightness(1); } 50% { filter: brightness(1.65); } 100% { filter: brightness(1); } }
+        @keyframes barDrain { 0% { filter: brightness(1); } 50% { filter: brightness(0.55); } 100% { filter: brightness(1); } }
+        @keyframes heartBeatBurst { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+        @keyframes heartAlert { 0% { transform: rotate(0deg); } 25% { transform: rotate(-12deg) scale(1.1); } 50% { transform: rotate(12deg) scale(1.1); } 75% { transform: rotate(-8deg); } 100% { transform: rotate(0deg); } }
+        @keyframes hudSpark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, -20px)) scale(0.2); } }
+        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-5px, 5px); filter: hue-rotate(90deg); } 40% { transform: translate(-5px, -5px); } 60% { transform: translate(5px, 5px); } 80% { transform: translate(5px, -5px); } 100% { transform: translate(0); } }
         @keyframes pulseRed { 0% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 60px rgba(255,0,0,0.6); } 100% { box-shadow: inset 0 0 0 rgba(255,0,0,0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
     </style>
@@ -167,8 +227,15 @@
     <div class="max-w-md w-full m-auto text-center px-4">
         <h1 class="text-5xl text-red-500 font-black mb-1 tracking-tighter drop-shadow-lg" style="font-family: 'Special Elite', cursive;">MAIMY</h1>
         <h2 class="text-xl text-white font-bold tracking-widest mb-8">KIDNAPPED</h2>
-        <p class="text-xs text-gray-500 mb-8 max-w-xs mx-auto">Amaran: Permainan ini mengandungi tema seram psikologi.</p>
-        <button id="btn-start" class="btn-start" onclick="initGame()">MULA EPISOD</button>
+        <p class="text-xs text-gray-500 mb-8 max-w-xs mx-auto">Warning: This game contains psychological horror themes.</p>
+        <div class="lang-switch">
+            <button id="lang-ms" class="lang-btn" onclick="setLanguage('ms')">Bahasa Melayu</button>
+            <button id="lang-en" class="lang-btn" onclick="setLanguage('en')">English</button>
+        </div>
+        <div class="menu-actions">
+            <button id="btn-start" class="btn-start" onclick="initGame()">Start Episode</button>
+            <button id="btn-continue" class="btn-start btn-continue" onclick="continueGame()" style="display:none;">CONTINUE</button>
+        </div>
     </div>
 </div>
 
@@ -191,7 +258,7 @@
     <div id="blackout" class="absolute-fill layer-overlay"></div>
     <div id="blood-screen" class="absolute-fill layer-overlay"></div>
     <div id="end-msg" class="layer-overlay font-bold">TAMAT</div>
-    <div id="update-msg" class="layer-overlay">The Next Episode will coming in the next Update</div>
+    <div id="update-msg" class="layer-overlay" onclick="next(true)">CONTINUE STORY</div>
 
     <!-- Layer 5: UI -->
     <div id="ui-layer" class="absolute-fill layer-ui">
@@ -214,6 +281,8 @@
     </div>
 </div>
 
+<script src="./language.ms.js"></script>
+<script src="./language.en.js"></script>
 <script>
     // ==========================================
     // ASSETS DB (GAMBAR DIRECT LINK)
@@ -226,182 +295,285 @@
     };
 
     let state = { node: 'intro_walk', aff: 0.5 };
-
-    // STORY DATA 
-    const story = {
-        // --- HARI 1 ---
-        'intro_walk': {
-            bg: 'street', sprite: null, narrator: true,
-            text: "Jam menunjukkan pukul 11 malam. Anda berjalan pulang dari kedai serbaneka melalui lorong yang sunyi.",
-            next: 'kidnap_moment'
-        },
-        'kidnap_moment': {
-            bg: 'street', sprite: null, narrator: true,
-            text: "Bunyi cengkerik menemani langkah anda. Tiba-tiba, anda terdengar bunyi tapak kaki laju di belakang anda.",
-            next: 'blackout_hit'
-        },
-        'blackout_hit': {
-            special: 'blackout', narrator: true,
-            text: "GEDEBUK!!\n\nSatu pukulan kuat hinggap di kepala anda. Pandangan anda menjadi gelap serta-merta.",
-            next: 'wakeup_room'
-        },
-        'wakeup_room': {
-            bg: 'room', sprite: null, narrator: true, special: 'fadein',
-            text: "Kepala anda berdenyut sakit. Anda membuka mata perlahan-lahan.\n\nIni... bukan bilik anda. Tangan anda terikat pada kepala katil.",
-            next: 'maimy_enter'
-        },
-        'maimy_enter': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Selamat pagi, sayang! Nyenyak awak tidur? Saya risau tau awak tak bangun-bangun dari semalam.",
-            next: 'first_choice'
-        },
-        'first_choice': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Jangan risau, saya ikat awak longgar je. Supaya awak tak 'sesat' lagi macam semalam.",
-            choices: [
-                { text: "Lepaskan aku! Siapa kau?!", delta: -0.3, next: 'path_angry' },
-                { text: "Kepala saya sakit... air...", delta: 0.1, next: 'path_calm' }
-            ]
-        },
-        'path_angry': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Shhh... jangan jerit. Jiran tak suka bising. Saya Maimy. Dan mulai hari ni, saya penjaga awak. Faham?",
-            choices: [
-                { text: "Kau gila! Aku nak balik!", delta: -0.4, next: 'trigger_death' },
-                { text: "Baik... saya faham.", delta: 0.1, next: 'path_calm' }
-            ]
-        },
-        'path_calm': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Kesiannya... mesti sakit kan kena pukul semalam? Maaf ya, saya terpaksa. Kalau tak, awak takkan ikut saya balik.",
-            next: 'feeding_time'
-        },
-        'feeding_time': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Nah, saya masak bubur. Buka mulut... Aaaa...",
-            choices: [
-                { text: "(Makan) Terima kasih, Maimy.", delta: 0.2, next: 'day_1_end' },
-                { text: "(Ludah makanan) Aku tak nak makanan kau!", delta: -0.5, next: 'trigger_death' }
-            ]
-        },
-        'day_1_end': {
-            bg: 'room', sprite: 'normal', narrator: true,
-            text: "Anda memilih untuk patuh. Maimy tersenyum puas dan menyuapkan makanan sehingga habis. Malam pun berlabuh...",
-            next: 'day_2_start'
-        },
-
-        // --- HARI 2: ISOLATION ---
-        'day_2_start': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Keesokan harinya... Maimy bersiap sedia dengan beg tangan. Dia kelihatan ceria.",
-            next: 'maimy_leaving'
-        },
-        'maimy_leaving': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Saya kena keluar beli barang dapur sekejap. Saya tak ikat awak hari ni, tapi pintu saya dah kunci. Jangan nakal-nakal ya?",
-            choices: [
-                { text: "Okay, hati-hati.", delta: 0.1, next: 'alone_start' },
-                { text: "Bawa aku sekali!", delta: -0.2, next: 'alone_angry' }
-            ]
-        },
-        'alone_angry': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Tak boleh! Dunia luar bahaya. Awak duduk sini diam-diam. Nanti saya belikan gula-gula.",
-            next: 'alone_start'
-        },
-        'alone_start': {
-            bg: 'room', sprite: null, narrator: true,
-            text: "Maimy keluar dan mengunci pintu. Anda kini keseorangan di dalam bilik.",
-            next: 'exploration_choice'
-        },
-        'exploration_choice': {
-            bg: 'room', sprite: null, narrator: true,
-            text: "Apa yang anda mahu lakukan?",
-            choices: [
-                { text: "Geledah Laci Meja", delta: 0, next: 'check_drawer' },
-                { text: "Periksa Tingkap", delta: 0, next: 'check_window' }
-            ]
-        },
-        'check_drawer': {
-            bg: 'room', sprite: null, narrator: true,
-            text: "Anda menjumpai sebuah diari lama. Isinya penuh dengan gambar anda yang diambil secara senyap sejak setahun lalu. 'Dia akhirnya milikku...', tulisnya.",
-            next: 'maimy_return_sound'
-        },
-        'check_window': {
-            bg: 'room', sprite: null, narrator: true,
-            text: "Tingkap itu dipaku dengan papan tebal dari luar. Mustahil untuk dibuka tanpa alatan berat. Anda terperangkap.",
-            next: 'maimy_return_sound'
-        },
-        'maimy_return_sound': {
-            bg: 'room', sprite: null, narrator: true,
-            text: "KLIK! Bunyi kunci pintu dibuka. Maimy sudah pulang lebih awal dari jangkaan!",
-            next: 'gift_scene'
-        },
-
-        // --- HADIAH ISTIMEWA ---
-        'gift_scene': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Saya dah balik! Rindu saya tak? Saya ada belikan hadiah istimewa untuk awak.",
-            choices: [
-                { text: "Hadiah apa?", delta: 0.1, next: 'gift_reveal' },
-                { text: "Aku tak nak hadiah kau.", delta: -0.2, next: 'gift_reveal_force' }
-            ]
-        },
-        'gift_reveal': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Nah... (Dia mengeluarkan rantai leher berloceng). Pakai ni? Supaya saya tahu mana awak pergi dalam rumah ni.",
-            next: 'wear_collar_choice'
-        },
-        'gift_reveal_force': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Jangan sombong. Nah, pakai rantai ni. Kalau tak, saya ikat awak balik kat katil.",
-            next: 'wear_collar_choice'
-        },
-        'wear_collar_choice': {
-            bg: 'room', sprite: 'normal', narrator: true,
-            text: "(Maimy memegang rantai itu sambil tersenyum menakutkan)",
-            choices: [
-                { text: "(Pakai) Cantik...", delta: 0.3, next: 'true_love_dinner' },
-                { text: "(Lempar) Aku bukan anjing kau!", delta: -0.5, next: 'trigger_death' }
-            ]
-        },
-
-        // --- MAKAN MALAM & ENDINGS ---
-        'true_love_dinner': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Anak yang baik... Jom makan? Saya masak daging istimewa hari ni.",
-            next: 'meat_joke'
-        },
-        'meat_joke': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Sedap tak? Daging ni... dari orang yang cuba kacau awak minggu lepas.",
-            choices: [
-                { text: "Apa?! (Muntah)", delta: -0.2, next: 'joke_reveal' },
-                { text: "Sedap... terima kasih.", delta: 0.4, next: 'stockholm_end' }
-            ]
-        },
-        'joke_reveal': {
-            bg: 'room', sprite: 'normal', name: 'Maimy',
-            text: "Hahaha! Gurau je lah. Tu daging lembu. Awak ni comel bila takut. Jom tidur?",
-            next: 'survival_end'
-        },
-        
-        'trigger_death': { special: 'die' },
-        'stockholm_end': {
-            bg: 'room', sprite: 'normal', narrator: true,
-            text: "[ TRUE YANDERE ENDING ]\nAnda menerima kegilaan Maimy. Anda berdua hidup bahagia dalam dunia kecil ini... selamanya.",
-            next: null
-        },
-        'survival_end': {
-            bg: 'room', sprite: 'normal', narrator: true,
-            text: "[ SURVIVAL ENDING ]\nAnda terselamat untuk satu lagi hari. Tetapi adakah anda akan bebas? Mungkin tidak.",
-            next: null
-        }
+    const SAVE_KEY = 'maimy_story_save_v1';
+    const CHECKPOINT_KEY = 'maimy_story_checkpoint_v1';
+    const LANGUAGE_KEY = 'maimy_story_lang_v1';
+    const LANGUAGE_FILES = {
+        ms: { global: 'languageMs' },
+        en: { global: 'languageEn' }
     };
+    let currentLanguage = getLocalStorageItem(LANGUAGE_KEY) || 'ms';
+    if (!LANGUAGE_FILES[currentLanguage]) currentLanguage = 'ms';
+
+    let story = {};
+    let storyLoadedLanguage = null;
+    let audioCtx = null;
+
+    function getLocalStorageItem(key) {
+        try { return localStorage.getItem(key); } catch (_) { return null; }
+    }
+
+    function ensureAudioReady() {
+        try {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return false;
+                audioCtx = new Ctx();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function playTone(freq, duration, type = 'sine', gainLevel = 0.03, delay = 0) {
+        if (!ensureAudioReady()) return;
+        const now = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(gainLevel, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+    }
+
+    function playSfx(type) {
+        if (!ensureAudioReady()) return;
+        if (type === 'start') {
+            playTone(392, 0.12, 'triangle', 0.025, 0);
+            playTone(523, 0.15, 'triangle', 0.022, 0.08);
+        } else if (type === 'choice_good') {
+            playTone(523, 0.1, 'sine', 0.028, 0);
+            playTone(659, 0.12, 'sine', 0.026, 0.07);
+        } else if (type === 'choice_bad') {
+            playTone(280, 0.12, 'sawtooth', 0.026, 0);
+            playTone(220, 0.16, 'sawtooth', 0.024, 0.06);
+        } else if (type === 'choice_neutral') {
+            playTone(460, 0.08, 'triangle', 0.02, 0);
+        } else if (type === 'continue') {
+            playTone(349, 0.09, 'triangle', 0.02, 0);
+            playTone(440, 0.1, 'triangle', 0.02, 0.06);
+        } else if (type === 'blocked') {
+            playTone(180, 0.07, 'square', 0.02, 0);
+        } else if (type === 'death') {
+            playTone(180, 0.2, 'sawtooth', 0.03, 0);
+            playTone(140, 0.25, 'sawtooth', 0.028, 0.12);
+        }
+    }
+
+    function setLocalStorageItem(key, value) {
+        try { localStorage.setItem(key, value); } catch (_) {}
+    }
+
+    function refreshContinueButton() {
+        const btn = document.getElementById('btn-continue');
+        if (!btn) return;
+        const hasSave = !!getLocalStorageItem(SAVE_KEY) || !!getLocalStorageItem(CHECKPOINT_KEY);
+        btn.style.display = hasSave ? 'block' : 'none';
+    }
+
+    function updateLanguageButtons() {
+        const msBtn = document.getElementById('lang-ms');
+        const enBtn = document.getElementById('lang-en');
+        if (!msBtn || !enBtn) return;
+        msBtn.classList.toggle('active', currentLanguage === 'ms');
+        enBtn.classList.toggle('active', currentLanguage === 'en');
+    }
+
+    function setLanguage(lang) {
+        if (!LANGUAGE_FILES[lang]) return;
+        currentLanguage = lang;
+        setLocalStorageItem(LANGUAGE_KEY, lang);
+        story = {};
+        storyLoadedLanguage = null;
+        updateLanguageButtons();
+    }
+
+    function cloneStoryData(src) {
+        return JSON.parse(JSON.stringify(src || {}));
+    }
+
+    function buildStoryForLanguage(lang) {
+        const msBase = window.languageMs && window.languageMs.story;
+        if (!msBase) return null;
+
+        // Gunakan BM sebagai sumber struktur story (next/choices/special/bg),
+        // kemudian hanya timpa teks untuk bahasa terpilih.
+        const output = cloneStoryData(msBase);
+        if (lang === 'ms') return output;
+
+        const cfg = LANGUAGE_FILES[lang];
+        const localized = cfg && window[cfg.global] && window[cfg.global].story;
+        if (!localized) return output;
+
+        Object.keys(output).forEach((nodeId) => {
+            const baseNode = output[nodeId];
+            const langNode = localized[nodeId];
+            if (!baseNode || !langNode) return;
+
+            if (typeof langNode.text === 'string') baseNode.text = langNode.text;
+            if (typeof langNode.name === 'string') baseNode.name = langNode.name;
+            if (Array.isArray(baseNode.choices) && Array.isArray(langNode.choices)) {
+                baseNode.choices.forEach((choice, i) => {
+                    if (langNode.choices[i] && typeof langNode.choices[i].text === 'string') {
+                        choice.text = langNode.choices[i].text;
+                    }
+                });
+            }
+        });
+
+        return output;
+    }
+
+    function saveProgress(nodeId) {
+        const payload = {
+            node: nodeId || state.node,
+            aff: state.aff,
+            savedAt: Date.now()
+        };
+        setLocalStorageItem(SAVE_KEY, JSON.stringify(payload));
+        refreshContinueButton();
+    }
+
+    function saveCheckpoint(nodeId) {
+        setLocalStorageItem(CHECKPOINT_KEY, nodeId);
+        saveProgress(nodeId);
+    }
+
+    function readSavedProgress() {
+        const raw = getLocalStorageItem(SAVE_KEY);
+        if (!raw) return null;
+        try {
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed.node !== 'string') return null;
+            return parsed;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function spawnHudSparks(isGood) {
+        const hud = document.getElementById('hud');
+        const ui = document.getElementById('ui-layer');
+        if (!hud || !ui) return;
+        const hudRect = hud.getBoundingClientRect();
+        const uiRect = ui.getBoundingClientRect();
+        const baseX = hudRect.left - uiRect.left + 20;
+        const baseY = hudRect.top - uiRect.top + hudRect.height / 2;
+        for (let i = 0; i < 7; i++) {
+            const dot = document.createElement('span');
+            dot.className = `hud-spark ${isGood ? 'spark-good' : 'spark-bad'}`;
+            dot.style.left = `${baseX + Math.random() * 70}px`;
+            dot.style.top = `${baseY + (Math.random() * 8 - 4)}px`;
+            dot.style.setProperty('--dx', `${(Math.random() * 60 - 30).toFixed(1)}px`);
+            dot.style.setProperty('--dy', `${(-20 - Math.random() * 35).toFixed(1)}px`);
+            ui.appendChild(dot);
+            setTimeout(() => dot.remove(), 700);
+        }
+    }
+
+    function animateLoveHud(delta) {
+        const hud = document.getElementById('hud');
+        const bar = document.getElementById('bar');
+        const heart = document.querySelector('.heart-icon');
+        if (!hud || !bar || !heart) return;
+
+        hud.classList.remove('hud-good', 'hud-bad');
+        bar.classList.remove('bar-surge', 'bar-drain');
+        heart.classList.remove('heart-beat', 'heart-alert');
+        void hud.offsetWidth;
+
+        if (delta > 0) {
+            hud.classList.add('hud-good');
+            bar.classList.add('bar-surge');
+            heart.classList.add('heart-beat');
+            spawnHudSparks(true);
+        } else if (delta < 0) {
+            hud.classList.add('hud-bad');
+            bar.classList.add('bar-drain');
+            heart.classList.add('heart-alert');
+            spawnHudSparks(false);
+        }
+
+        setTimeout(() => {
+            hud.classList.remove('hud-good', 'hud-bad');
+            bar.classList.remove('bar-surge', 'bar-drain');
+            heart.classList.remove('heart-beat', 'heart-alert');
+        }, 500);
+    }
+
+    function resetSceneForPlay() {
+        document.getElementById('blood-screen').style.opacity = 0;
+        document.getElementById('end-msg').style.opacity = 0;
+        document.getElementById('update-msg').style.opacity = 0;
+        document.getElementById('update-msg').style.pointerEvents = 'none';
+        document.getElementById('dialog').style.display = 'block';
+        document.getElementById('hud').style.visibility = 'visible';
+        document.getElementById('game-stage').classList.remove('shake');
+        document.getElementById('game-stage').classList.remove('pulse-red');
+    }
+
+    async function ensureStoryLoaded() {
+        if (Object.keys(story).length > 0 && storyLoadedLanguage === currentLanguage) return true;
+        const builtStory = buildStoryForLanguage(currentLanguage);
+        if (builtStory) {
+            story = builtStory;
+            storyLoadedLanguage = currentLanguage;
+            return true;
+        }
+        document.getElementById('text').innerText = 'Ralat: fail language tidak dijumpai.';
+        return false;
+    }
 
     // ENGINE
-    function initGame() {
+    async function initGame() {
+        const loaded = await ensureStoryLoaded();
+        if (!loaded) return;
+        ensureAudioReady();
+        playSfx('start');
+
+        resetSceneForPlay();
+        state.aff = 0.5;
         document.getElementById('setup-screen').style.display = 'none';
+        render('intro_walk');
+        updateBar();
+    }
+
+    async function continueGame() {
+        const loaded = await ensureStoryLoaded();
+        if (!loaded) return;
+        ensureAudioReady();
+        playSfx('continue');
+
+        resetSceneForPlay();
+        document.getElementById('setup-screen').style.display = 'none';
+
+        const checkpointNode = getLocalStorageItem(CHECKPOINT_KEY);
+        if (checkpointNode && story[checkpointNode]) {
+            const saved = readSavedProgress();
+            state.aff = (saved && typeof saved.aff === 'number') ? saved.aff : 0.5;
+            render(checkpointNode);
+            updateBar();
+            return;
+        }
+
+        const saved = readSavedProgress();
+        if (saved && story[saved.node]) {
+            state.aff = (typeof saved.aff === 'number') ? saved.aff : 0.5;
+            render(saved.node);
+            updateBar();
+            return;
+        }
+
+        state.aff = 0.5;
         render('intro_walk');
         updateBar();
     }
@@ -429,6 +601,11 @@
         }
         
         if(node.special === 'die') { killSequence(); return; }
+
+        saveProgress(id);
+        if (node.next === 'day_3_start') {
+            saveCheckpoint(id);
+        }
 
         // UPDATE BACKGROUND URLS FROM ASSETS DB
         if(node.bg === 'street') bgLayer.style.backgroundImage = `url('${assets.street}')`;
@@ -494,18 +671,32 @@
             document.querySelector('.animate-bounce').style.display = 'block';
         }
 
-        // TUNJUK MESEJ "NEXT EPISODE" JIKA TIADA SAMBUNGAN (ENDING BIASA)
-        if(node.next === null && node.special !== 'die') {
+        // TUNJUK BUTANG CONTINUE UNTUK SAMBUNG DAY 3
+        const shouldShowEndingContinue = !node.choices && node.next === 'day_3_start';
+        if(shouldShowEndingContinue) {
+            document.querySelector('.animate-bounce').style.display = 'none';
             setTimeout(() => {
-                document.getElementById('update-msg').style.opacity = 1;
+                const continueBtn = document.getElementById('update-msg');
+                continueBtn.style.opacity = 1;
+                continueBtn.style.pointerEvents = 'auto';
             }, 800);
         } else {
-            document.getElementById('update-msg').style.opacity = 0;
+            const continueBtn = document.getElementById('update-msg');
+            continueBtn.style.opacity = 0;
+            continueBtn.style.pointerEvents = 'none';
         }
     }
 
     function makeChoice(c) {
         state.aff += c.delta;
+        animateLoveHud(c.delta);
+        if (c.delta > 0) {
+            playSfx('choice_good');
+        } else if (c.delta < 0) {
+            playSfx('choice_bad');
+        } else {
+            playSfx('choice_neutral');
+        }
         updateBar();
         showFeedback(c.delta);
 
@@ -521,25 +712,23 @@
         const hud = document.getElementById('hud');
         const el = document.createElement('div');
         el.className = `floating-text ${delta >= 0 ? 'ft-good' : 'ft-bad'}`;
-        
+
         const rect = hud.getBoundingClientRect();
         el.style.left = `${rect.right + 10}px`;
         el.style.top = `${rect.top}px`;
-        
+
         if (delta > 0) {
-            el.innerText = "+❤";
-            hud.classList.add('pop-in'); 
+            el.innerText = '+LOVE';
         } else if (delta < 0) {
-            el.innerText = "-💔";
-            document.getElementById('game-stage').classList.add('shake'); 
-            document.getElementById('char-sprite').classList.add('glitch-anim'); 
+            el.innerText = '-LOVE';
+            document.getElementById('game-stage').classList.add('shake');
+            document.getElementById('char-sprite').classList.add('glitch-anim');
             setTimeout(() => {
                 document.getElementById('game-stage').classList.remove('shake');
                 document.getElementById('char-sprite').classList.remove('glitch-anim');
-                hud.classList.remove('pop-in');
             }, 500);
         } else {
-            el.innerText = "⚪";
+            el.innerText = 'OK';
         }
 
         document.getElementById('ui-layer').appendChild(el);
@@ -566,6 +755,7 @@
     }
 
     function killSequence() {
+        playSfx('death');
         const charImg = document.getElementById('char-sprite');
         charImg.src = assets.killer; 
         charImg.style.opacity = 1;
@@ -590,14 +780,21 @@
             document.getElementById('blood-screen').style.opacity = 1;
             document.getElementById('end-msg').style.opacity = 1;
             document.getElementById('update-msg').style.opacity = 0; // PASTIKAN TIDAK MUNCUL KETIKA MATI
+            document.getElementById('update-msg').style.pointerEvents = 'none';
             document.getElementById('dialog').style.display = 'none';
             document.getElementById('end-msg').innerText = "TAMAT";
         }, 2000);
     }
 
-    function next() {
+    function next(force = false) {
         const node = story[state.node];
+        const requiresManualContinue = node && node.next === 'day_3_start';
+        if (requiresManualContinue && !force) {
+            playSfx('blocked');
+            return;
+        }
         if(!node.choices && node.special !== 'die' && node.next) {
+            playSfx(force ? 'continue' : 'choice_neutral');
             render(node.next);
         }
     }
@@ -608,8 +805,9 @@
             next();
         }
     });
+
+    refreshContinueButton();
+    updateLanguageButtons();
 </script>
 </body>
 </html>
-
-
